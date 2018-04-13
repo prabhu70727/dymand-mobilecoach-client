@@ -59,7 +59,7 @@ export default {
       defaultNickname: 'Whitelabel App User',
       interventionPattern: '----',
       interventionPassword: '----',
-      androidSenderId: '130913843366',
+      androidSenderId: '123456789012',
       localDeepstreamURL: 'ws://127.0.0.1:6020/deepstream',
       localRestURL: 'http://127.0.0.1:8080/PMCP/api/v02/',
       remoteDeepstreamURL: 'wss://---:8443/deepstream',

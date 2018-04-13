@@ -51,7 +51,7 @@ export default class PDFGenerator {
             stack: [
               {
                 text: [
-                  'BLV FoodTour: ',
+                  'MobileCoach Client: ',
                   {text: I18n.t('PDFExport.title'), fontSize: 14}
                 ],
                 style: 'header'
