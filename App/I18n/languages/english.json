@@ -1,0 +1,15 @@
+{
+  "Onboarding": {
+      "title":"MobileCoach Client",
+      "subtitle": "...",
+      "next": "Weiter",
+      "chooseLanguage": "Bitte wähle deine bevorzugte Sprache",
+      "chooseCoach": "Suche dir einen Guide aus",
+      "welcome": "Herzlich willkommen bei ...",
+      "start": "Los geht's"
+  },
+  "Coaches": {
+      "0":"Lukas",
+      "1":"Anna"
+  }
+}

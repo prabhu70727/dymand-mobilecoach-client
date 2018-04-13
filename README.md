@@ -1,29 +1,50 @@
-# README #
+# MobileCoach Client Template
 
-This README would normally document whatever steps are necessary to get your application up and running.
 
-### What is this repository for? ###
+## Run
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+	react-native run-ios
 
-### How do I get set up? ###
+or
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+	react-native run-android
 
-### Contribution guidelines ###
+## Cleanup
 
-* Writing tests
-* Code review
-* Other guidelines
+	./cleanup.sh
 
-### Who do I talk to? ###
+If still problems occur:
 
-* Repo owner or admin
-* Other community or team contact
+	./cleanup.sh hard
+
+
+## Customization
+
+```
+./repackage.sh   
+./recolor.sh   
+./reicon.sh
+```
+
+### App Configuration:
+
+Mainly in these files:
+
+* ```App/Config/AppConfig.js```
+* ```App/Themes/Brand.js```
+* ```App/Themes/Colors.js```
+* ```App/Themes/Fonts.js```
+* ```App/Themes/Images.js```
+
+### APIs:
+
+**Fabric Crashlytics:**   
+API Key in ```android/app/src/main/AndroidManifest.xml``` and in ```ios/APP_FOLDER/Info.plist```
+
+### Building keys (Android only):
+```android/app/build.gradle```
+
+### Versions:
+Version and build in ```android/app/build.gradle``` and in ```ios/APP_FOLDER/Info.plist```
+
+**Version 1.0**

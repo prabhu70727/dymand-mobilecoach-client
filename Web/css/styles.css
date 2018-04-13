@@ -1,0 +1,161 @@
+/* ---------------------------------------------------------
+   HTML5 Bones
+   This stylesheet contains print styling and a section for
+   you to simply add your own. This is a basic template
+   after all.
+   ---------------------------------------------------------*/
+
+body {}
+/* Default link styling */
+
+a:link {
+    color: #0271fb;
+}
+a:visited {
+    color: #bd02fb;
+}
+a:hover,
+a:focus {
+    color: #000;
+}
+a:active {
+    color: #fb0e02;
+}
+/* ---------------------------------------------------------
+   Print styles
+   ---------------------------------------------------------*/
+
+@media print {
+    * {
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        background: transparent !important;
+    }
+    html {
+        background-color: #fff;
+    }
+    /* Hide navigation */
+    nav {
+        display: none;
+    }
+    /* Show link destinations in brackets after the link text */
+    a[href]:after {
+        content: " (" attr(href)") ";
+    }
+    a[href] {
+        font-weight: bold;
+        text-decoration: underline;
+        color: #06c;
+        border: none;
+    }
+    /* Don't show link destinations for JavaScript or internal links */
+    a[href^="javascript:"]:after,
+    a[href^="#"]:after {
+        content: "";
+    }
+    /* Show abbr title value in brackets after the text */
+    abbr[title]:after {
+        content: " (" attr(title)")";
+    }
+    figure {
+        margin-bottom: 1em;
+        overflow: hidden;
+    }
+    figure img {
+        border: 1px solid #000;
+    }
+}
+/* ---------------------------------------------------------
+   Author's styles
+   ---------------------------------------------------------*/
+
+@font-face {
+   font-family: 'RobotoBold';
+       src: url('../fonts-also-app/Roboto-Bold.ttf') format('truetype');
+   font-weight: bold;
+   font-style: normal;
+     }
+
+@font-face {
+   font-family: 'RobotoBoldItalic';
+       src: url('../fonts-also-app/Roboto-Bold-Italic.ttf') format('truetype');
+   font-weight: bold;
+   font-style: italic;
+     }
+
+@font-face {
+   font-family: 'RobotoItalic';
+       src: url('../fonts-also-app/Roboto-Italic.ttf') format('truetype');
+   font-weight: normal;
+   font-style: italic;
+     }
+
+@font-face {
+   font-family: 'RobotoRegular';
+       src: url('../fonts-also-app/Roboto-Regular.ttf') format('truetype');
+   font-weight: normal;
+   font-style: normal;
+     }
+
+button {
+  display: none;
+}
+body {
+    padding: 20px 20px 20px 20px;
+    font-family: 'RobotoRegular';
+    font-weight: normal;
+    font-style: normal;
+    color: #313F48;
+}
+
+i,
+.italic{
+    font-family: "RobotoItalic";
+}
+
+b,
+.bold{
+    font-family: "RobotoBold";
+}
+
+b i,
+i b,
+.bold.italic{
+    font-family: "RobotoBoldItalic";
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #313F48;
+}
+
+h1 {
+  font-size: 1.4em;
+  font-family: "RobotoBold";
+}
+
+h2 {
+  font-size: 1.3em;
+}
+
+h3 {
+  font-size: 1.2em;
+}
+
+h4, h5, h6 {
+  font-size: 1.1em;
+}
+
+img.fill {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    width: 100%;
+}
+
+.with-linebreaks {
+    white-space: pre-line;
+}
+
+.error {
+    color: red;
+}
