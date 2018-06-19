@@ -1,5 +1,7 @@
 import { createReducer, createActions } from 'reduxsauce'
 import Immutable from 'seamless-immutable'
+
+import Common from '../Utils/Common'
 import { MessageActions } from './MessageRedux'
 import Config from '../Config/AppConfig'
 
@@ -47,12 +49,11 @@ export const setLastSeenIndex = (state, {lastSeenIndex}) => {
 }
 
 export const handleProgressCommand = (state, {command}) => {
-  const commandWithValue = command.split(' ')
-  const onlyCommand = commandWithValue[0]
+  const parsedCommand = Common.parseCommand(command)
 
-  switch (onlyCommand) {
+  switch (parsedCommand.command) {
     case 'jump-tour':
-      const tourStep = commandWithValue[1]
+      const tourStep = parsedCommand.value
       if (TOUR_STEPS.includes(tourStep)) {
         log.debug('New tour step (by command):', tourStep)
         return {

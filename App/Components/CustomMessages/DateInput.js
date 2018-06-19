@@ -35,6 +35,9 @@ export default class DateInput extends Component {
     } else {
       dateTime = min
     }
+    if (dateTime == null) {
+      return null
+    }
     switch (currentMessage.custom.mode) {
       case 'time': {
         const hour = Math.floor(Number(dateTime))
@@ -77,7 +80,7 @@ export default class DateInput extends Component {
       } else {
         // Check if date is valid (on IOS, we can rely on the datePicker, while on android there is no
         // min/max values for the time-picker)
-        if (this.state.date < this.minDate || this.state.date > this.maxDate) {
+        if ((this.minDate != null && this.state.date < this.minDate) || (this.maxDate != null && this.state.date > this.maxDate)) {
           return Alert.alert(I18n.t('Common.invalid'),
               (`${I18n.t('Common.datePicker.outOfRange')} ${moment(this.minDate).format(this.formatDateForClient())} ${I18n.t('Common.and')}\n${moment(this.maxDate).format(this.formatDateForClient())}.`),
             [
@@ -177,11 +180,11 @@ export default class DateInput extends Component {
             is24Hour
             locale={moment.locale()}
             format={this.formatDateForClient()}
-            placeholder={currentMessage.custom.placeholder}
+            placeholder={currentMessage.custom.placeholder === '' ? ' ' : currentMessage.custom.placeholder}
             confirmBtnText={I18n.t('Common.confirm')}
             cancelBtnText={I18n.t('Common.abort')}
-            minDate={this.correctBoundsForAndroidPicker(this.minDate)}
-            maxDate={this.correctBoundsForAndroidPicker(this.maxDate)}
+            minDate={this.minDate ? this.correctBoundsForAndroidPicker(this.minDate) : undefined}
+            maxDate={this.maxDate ? this.correctBoundsForAndroidPicker(this.maxDate) : undefined}
             iconComponent={<Icon name={icon} containerStyle={{
               position: 'absolute',
               left: 0,
@@ -193,7 +196,12 @@ export default class DateInput extends Component {
               placeholderText: [styles.dateText]
             // ... You can check the source to find the other keys.
             }}
-            onDateChange={(string, date) => this.setState({date})}
+            onDateChange={(string, date) => {
+              // clear seconds (android time-picker sets seconds)
+              date.setSeconds(0)
+              date.setMilliseconds(0)
+              this.setState({date})
+            }}
            />
           <Button
             containerStyle={styles.button}

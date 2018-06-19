@@ -1,25 +1,24 @@
 import { createStore, applyMiddleware, compose } from 'redux'
 import { autoRehydrate } from 'redux-persist'
-import Config from '../Config/DebugConfig'
 import createSagaMiddleware from 'redux-saga'
+
 import RehydrationServices from '../Services/RehydrationServices'
-import ReduxPersist from '../Config/ReduxPersist'
 import ScreenTracking from './ScreenTrackingMiddleware'
 
-// creates the store
-export default (rootReducer, rootSaga) => {
+// Creates the store
+export default (rootReducer, rootSaga, encryptionKey) => {
   /* ------------- Redux Configuration ------------- */
 
   const middleware = []
   const enhancers = []
 
   /* ------------- Analytics Middleware ------------- */
+
   middleware.push(ScreenTracking)
 
   /* ------------- Saga Middleware ------------- */
 
-  const sagaMonitor = Config.useReactotron ? console.tron.createSagaMonitor() : null
-  const sagaMiddleware = createSagaMiddleware({ sagaMonitor })
+  const sagaMiddleware = createSagaMiddleware({ })
   middleware.push(sagaMiddleware)
 
   /* ------------- Assemble Middleware ------------- */
@@ -28,13 +27,10 @@ export default (rootReducer, rootSaga) => {
 
   /* ------------- AutoRehydrate Enhancer ------------- */
 
-  // add the autoRehydrate enhancer
-  if (ReduxPersist.active) {
-    enhancers.push(autoRehydrate())
-  }
+  // Add the autoRehydrate enhancer
+  enhancers.push(autoRehydrate())
 
   // Add react dev tools
-
   const composeEnhancers =
     typeof window === 'object' &&
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
@@ -42,16 +38,12 @@ export default (rootReducer, rootSaga) => {
         // Specify extension’s options like name, actionsBlacklist, actionsCreators, serialize...
       }) : compose
 
-  // if Reactotron is enabled (default for __DEV__), we'll create the store through Reactotron
-  const createAppropriateStore = Config.useReactotron ? console.tron.createStore : createStore
-  const store = createAppropriateStore(rootReducer, composeEnhancers(...enhancers))
+  const store = createStore(rootReducer, composeEnhancers(...enhancers))
 
-  // configure persistStore and check reducer version number
-  if (ReduxPersist.active) {
-    RehydrationServices.updateReducers(store)
-  }
+  // Configure persistStore (including encryption)
+  RehydrationServices.updateReducers(store, encryptionKey)
 
-  // kick off root saga
+  // Kick off root saga
   sagaMiddleware.run(rootSaga)
 
   return store

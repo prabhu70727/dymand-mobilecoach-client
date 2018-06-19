@@ -161,9 +161,6 @@ const styles = StyleSheet.create({
     })
   },
   backIcon: {
-    position: 'absolute',
-    left: 10,
-    top: 0,
     fontSize: 30,
     color: Colors.main.grey2
   }

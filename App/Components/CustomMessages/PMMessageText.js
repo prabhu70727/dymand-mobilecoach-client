@@ -1,19 +1,59 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, Text, ViewPropTypes, Linking } from 'react-native'
+import {
+  StyleSheet,
+  View,
+  Text,
+  ViewPropTypes,
+  Linking } from 'react-native'
 import PropTypes from 'prop-types'
 import ParsedText from 'react-native-parsed-text'
 
 import ChatImage from './ChatImage'
+import ChatVideo from './ChatVideo'
 
 import Log from '../../Utils/Log'
-const log = new Log('Sagas/GiftedChatMessageSaga')
+const log = new Log('CustomMessages/PMMessageText')
 
+const URL_PATTERN = /(https?:\/\/|www\.)[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/i
 const WWW_URL_PATTERN = /^www\./i
+const MARKDOWN_URL_PATTERN = /\[(.+?)\]\(.+?\)/i
+const CONTENT_TYPES = {IMAGE: 'image', VIDEO: 'video'}
 
 export default class PMMessageText extends Component {
   static propTypes = {
+    showModal: PropTypes.func,
+    position: PropTypes.oneOf(['left', 'right']),
     currentMessage: PropTypes.object,
-    showModal: PropTypes.func
+    containerStyle: PropTypes.shape({
+      left: ViewPropTypes.style,
+      right: ViewPropTypes.style
+    }),
+    textStyle: PropTypes.shape({
+      left: Text.propTypes.style,
+      right: Text.propTypes.style
+    }),
+    linkStyle: PropTypes.shape({
+      left: Text.propTypes.style,
+      right: Text.propTypes.style
+    }),
+    textProps: PropTypes.object,
+    customTextStyle: Text.propTypes.style,
+    parsePatterns: PropTypes.array
+  }
+
+  static defaultProps = {
+    position: 'left',
+    currentMessage: {
+      text: ''
+    },
+    containerStyle: {},
+    textStyle: {},
+    linkStyle: {},
+    parsePatterns: []
+  }
+
+  static contextTypes = {
+    actionSheet: PropTypes.func
   }
 
   renderText (text) {
@@ -22,20 +62,36 @@ export default class PMMessageText extends Component {
       else text = this.props.currentMessage.text
     }
     const linkStyle = StyleSheet.flatten([styles[this.props.position].link, this.props.linkStyle])
+
     return (
       <View style={[styles[this.props.position].container, this.props.containerStyle[this.props.position]]}>
         <ParsedText
           style={[styles[this.props.position].text, this.props.textStyle[this.props.position], this.props.customTextStyle]}
           parse={[
-            ...this.props.parsePatterns(linkStyle, (url) => this.onUrlPress(url)),
+            // Markdown URLs
+            {pattern: MARKDOWN_URL_PATTERN, style: linkStyle, onPress: this.onUrlPress, renderText: this.renderMarkdownUrl},
+            // URLs
+            {pattern: URL_PATTERN, style: linkStyle, onPress: this.onUrlPress},
+            // Linked Survey
             {pattern: /####LINKED_SURVEY####/, style: linkStyle, onPress: () => this.onUrlPress(this.props.currentMessage.custom.linkedSurvey), renderText: this.replaceSurveyPlaceholder}
-          ]}
+          ].concat(this.props.parsePatterns)}
           childrenProps={{...this.props.textProps}}
           renderText={this.replaceText}
         >
           {text}
         </ParsedText>
       </View>
+    )
+  }
+
+  renderMarkdownUrl (matchingString) {
+    // matches => ["[@michel:5455345]", "@michel", "5455345"]
+    let pattern = /\[(.+)\]/i
+    let result = ''
+    let matches = matchingString.match(pattern)
+    if (matches && matches[1]) result = matches[1]
+    return (
+      <Text>{result}</Text>
     )
   }
 
@@ -51,21 +107,30 @@ export default class PMMessageText extends Component {
   onUrlPress (url) {
     // When someone sends a message that includes a website address beginning with "www." (omitting the scheme),
     // react-native-parsed-text recognizes it as a valid url, but Linking fails to open due to the missing scheme.
-    if (WWW_URL_PATTERN.test(url)) {
-      this.onUrlPress(`http://${url}`)
-    } else {
-      Linking.canOpenURL(url).then((supported) => {
-        if (!supported) {
-          log.warn('No handler for URL:', url)
-        } else {
-          Linking.openURL(url)
-        }
-      })
+    let cleanedUrl = url
+    // first, "clean" urls
+    if (WWW_URL_PATTERN.test(cleanedUrl)) {
+      cleanedUrl = `http://${cleanedUrl}`
     }
+    // extract markdown URLS
+    if (MARKDOWN_URL_PATTERN.test(cleanedUrl)) {
+      let matches = cleanedUrl.match(/\((.+)\)/)
+      // If Markdown pattern was found, there should always be a match!
+      // Double check for stability..
+      if (matches[1]) cleanedUrl = matches[1]
+    }
+    // Then open URL
+    Linking.canOpenURL(cleanedUrl).then((supported) => {
+      if (!supported) {
+        log.warn('No handler for URL:', cleanedUrl)
+      } else {
+        Linking.openURL(cleanedUrl)
+      }
+    })
   }
 
-  renderMediaText () {
-    const { text } = this.props.currentMessage
+  renderMediaText (renderMedia = () => null) {
+    const {text} = this.props.currentMessage
     let subTexts = text.split('####LINKED_MEDIA_OBJECT####')
     return (
       subTexts.map((subText, index) => {
@@ -80,7 +145,7 @@ export default class PMMessageText extends Component {
           return (
             <View key={index} style={{justifyContent: 'center', alignItems: 'center'}}>
               {this.renderText(subText)}
-              <ChatImage source={this.props.currentMessage.custom.linkedMedia} showModal={(component, content, onClose) => this.props.showModal(component, content, onClose)} />
+              {renderMedia()}
             </View>
           )
         }
@@ -93,13 +158,37 @@ export default class PMMessageText extends Component {
     if (currentMessage.text) {
       // Check if the message contains media
       if (currentMessage.custom.linkedMedia && currentMessage.text.includes('####LINKED_MEDIA_OBJECT####')) {
-        return (
-          <View>
-            {this.renderMediaText()}
-          </View>
-        )
+        // Check content-type of media and render accordingly
+        switch (currentMessage.custom.mediaType) {
+          case CONTENT_TYPES.IMAGE:
+            return (
+              <View>
+                {this.renderMediaText(this.renderImage)}
+              </View>
+            )
+          case CONTENT_TYPES.VIDEO:
+            return (
+              <View>
+                {this.renderMediaText(this.renderVideo)}
+              </View>
+            )
+          // Fallback-Strategy: If there is a linked-Media-Object, but the contentType is unknown, just render the URL as a link-text.
+          default:
+            log.warn('Unknown contentType', this.state.contentType, 'found for linkedMedia-url: ', currentMessage.custom.linkedMedia)
+            return (
+              this.renderText(currentMessage.text.replace('####LINKED_MEDIA_OBJECT####', currentMessage.custom.linkedMedia))
+            )
+        }
       } else return this.renderText()
     }
+  }
+
+  renderImage = () => {
+    return <ChatImage source={this.props.currentMessage.custom.linkedMedia} showModal={(component, content, onClose) => this.props.showModal(component, content, onClose)} />
+  }
+
+  renderVideo = () => {
+    return <ChatVideo source={this.props.currentMessage.custom.linkedMedia} showModal={(component, content, onClose) => this.props.showModal(component, content, onClose)} />
   }
 }
 
@@ -133,42 +222,4 @@ const styles = {
       textDecorationLine: 'underline'
     }
   })
-}
-
-PMMessageText.contextTypes = {
-  actionSheet: PropTypes.func
-}
-
-PMMessageText.defaultProps = {
-  position: 'left',
-  currentMessage: {
-    text: ''
-  },
-  containerStyle: {},
-  textStyle: {},
-  linkStyle: {},
-  parsePatterns: (linkStyle, onPress) => [
-    // URLS:
-    {type: 'url', style: linkStyle, onPress}
-  ]
-}
-
-PMMessageText.propTypes = {
-  position: PropTypes.oneOf(['left', 'right']),
-  currentMessage: PropTypes.object,
-  containerStyle: PropTypes.shape({
-    left: ViewPropTypes.style,
-    right: ViewPropTypes.style
-  }),
-  textStyle: PropTypes.shape({
-    left: Text.propTypes.style,
-    right: Text.propTypes.style
-  }),
-  linkStyle: PropTypes.shape({
-    left: Text.propTypes.style,
-    right: Text.propTypes.style
-  }),
-  parsePatterns: PropTypes.func,
-  textProps: PropTypes.object,
-  customTextStyle: Text.propTypes.style
 }

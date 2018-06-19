@@ -16,7 +16,6 @@ import I18n from '../../I18n/I18n'
 import PMNavigationBar from '../../Components/Navbar'
 import TourActions from '../../Redux/TourRedux'
 import InfoButton from '../../Components/InfoButton'
-import ServerMessageActions from '../../Redux/MessageRedux'
 import AppConfig from '../../Config/AppConfig'
 
 import {Metrics, Colors} from '../../Themes/'
@@ -227,7 +226,6 @@ class AnimatedTour extends Component {
   }
 
   backToChat = () => {
-    this.props.sendIntention(null, 'tour-opened', null)
     this.props.navigation.navigate('Chat')
   }
 
@@ -354,8 +352,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapStateToDispatch = dispatch => ({
-  setLastSeenIndex: (lastSeenIndex) => dispatch(TourActions.setLastSeenIndex(lastSeenIndex)),
-  sendIntention: (text, intention, content) => dispatch(ServerMessageActions.sendIntention(text, intention, content))
+  setLastSeenIndex: (lastSeenIndex) => dispatch(TourActions.setLastSeenIndex(lastSeenIndex))
 })
 
 export default connect(mapStateToProps, mapStateToDispatch)(AnimatedTour)

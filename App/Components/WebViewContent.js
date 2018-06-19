@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import { View, WebView, StyleSheet, Platform, ActivityIndicator } from 'react-native'
 import {connect} from 'react-redux'
+import KeyboardSpacer from 'react-native-keyboard-spacer'
 
 import HeaderBar from './HeaderBar'
-import {Metrics} from '../Themes/'
+import {Colors} from '../Themes/'
 import ServerMessageActions from '../Redux/MessageRedux'
 
 import Log from '../Utils/Log'
@@ -38,31 +39,31 @@ class WebViewContent extends Component {
             // onLoadEnd={this.onLoadEnd}
             // onNavigationStateChange={this.onNavigationStateChange}
             onError={this.onError}
+            startInLoadingState
             renderLoading={() => {
               return (
-                <View>
+                <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
                   <ActivityIndicator
                     animating
-                    color='#000000'
+                    color={Colors.modal.loadingIndicator}
                     size='large'
-                    hidesWhenStopped
-                    style={{alignItems: 'center', justifyContent: 'center', paddingTop: Metrics.screenHeight / 2.25, flex: 1}} />
+                    hidesWhenStopped />
                 </View>
               )
             }}
             renderError={(e) => {
               return (
-                <View>
+                <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
                   <ActivityIndicator
                     animating
-                    color='#000000'
+                    color={Colors.modal.loadingIndicator}
                     size='large'
-                    hidesWhenStopped
-                    style={{alignItems: 'center', justifyContent: 'center', paddingTop: Metrics.screenHeight / 2.25, flex: 1}} />
+                    hidesWhenStopped />
                 </View>
               )
             }}
-            />
+          />
+          {Platform.OS === 'android' ? <KeyboardSpacer /> : null}
         </View>
       </View>
     )
@@ -71,7 +72,7 @@ class WebViewContent extends Component {
   onError = (e) => {
     if (e) {
       log.warn('Reloading...')
-      this.refs.web.reload()
+      setTimeout(this.refs.web.reload, 5000)
     }
   }
 

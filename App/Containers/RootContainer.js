@@ -4,17 +4,9 @@ import ReduxNavigation from '../Navigation/ReduxNavigation'
 import { connect } from 'react-redux'
 import StartupActions from '../Redux/StartupRedux'
 import ServerSyncActions from '../Redux/ServerSyncRedux'
-import ReduxPersist from '../Config/ReduxPersist'
 import PropTypes from 'prop-types'
 
 class RootContainer extends Component {
-  componentDidMount () {
-    // if redux persist is not active fire startup action
-    if (!ReduxPersist.active) {
-      this.props.startup()
-    }
-  }
-
   render () {
     return (
       <View style={{flex: 1}}>

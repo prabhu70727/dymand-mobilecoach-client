@@ -1,4 +1,3 @@
-import './App/Config/ReactotronConfig'
 import { AppRegistry } from 'react-native'
 import { ImageCacheProvider } from 'react-native-cached-image'
 
@@ -14,7 +13,7 @@ if (config.dev.purgeStoreAtStartup) {
 }
 
 // Initialize push notifications
-PushNotifications.getInstance().init(config.dev.purgeStoreAtStartup, config.serverSync.androidSenderId)
+PushNotifications.getInstance().init(config.dev.purgeStoreAtStartup, config.serverSync.androidSenderId, config.startup.automaticallyRequestPushPermissions)
 
 // Start app
 AppRegistry.registerComponent('MobileCoachClient', () => App)

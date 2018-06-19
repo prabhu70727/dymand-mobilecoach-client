@@ -3,6 +3,8 @@ import Immutable from 'seamless-immutable'
 import moment from 'moment'
 import R from 'ramda'
 import update from 'immutability-helper'
+
+import Common from '../Utils/Common'
 import { MessageActions } from './MessageRedux'
 
 const { Types, Creators } = createActions({
@@ -124,14 +126,14 @@ export const addRecentlyAddedFood = (state, { food }) => {
 // }
 
 export const handleProgressCommand = (state, {command, content}) => {
-  const commandWithValue = command.split(' ')
-  const onlyCommand = commandWithValue[0]
+  const parsedCommand = Common.parseCommand(command)
+
   const activeTrackingPeriodIndex = state.activeTrackingPeriod
   const {trackingPeriods} = state
-  switch (onlyCommand) {
+  switch (parsedCommand.command) {
     // Add a complete day to the current trackingPeriod
     case 'tracked-day-complete':
-      let completeDate = commandWithValue[1]
+      let completeDate = parsedCommand.value
       let newTrackedDaysComplete = [...trackingPeriods[activeTrackingPeriodIndex].trackedDaysComplete]
       if (!newTrackedDaysComplete.includes(completeDate)) {
         newTrackedDaysComplete.push(completeDate)
@@ -147,7 +149,7 @@ export const handleProgressCommand = (state, {command, content}) => {
         trackingPeriods: {[activeTrackingPeriodIndex]: {trackedDaysComplete: {$set: newTrackedDaysComplete}}}
       })
     case 'tracked-day-incomplete':
-      let incompleteDate = commandWithValue[1]
+      let incompleteDate = parsedCommand.value
       let newTrackedDaysIncomplete = [...trackingPeriods[activeTrackingPeriodIndex].trackedDaysIncomplete]
       if (!newTrackedDaysIncomplete.includes(incompleteDate)) {
         newTrackedDaysIncomplete.push(incompleteDate)
@@ -161,8 +163,8 @@ export const handleProgressCommand = (state, {command, content}) => {
       })
     case 'tracked-day-circumstances':
       const circumstances = ['ordinary', 'shortTime', 'sick', 'vacation', 'noAppetite', 'invited', 'other']
-      let date = commandWithValue[1]
-      let circumstance = circumstances[commandWithValue[2]]
+      let date = parsedCommand.values[0]
+      let circumstance = circumstances[parsedCommand.values[1]]
       let newCircumstances = R.clone(state.circumstances)
       newCircumstances[date] = circumstance
       return {

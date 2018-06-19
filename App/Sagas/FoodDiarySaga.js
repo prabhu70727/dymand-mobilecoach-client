@@ -1,6 +1,7 @@
 
 import { takeEvery, put, select } from 'redux-saga/effects'
 
+import Common from '../Utils/Common'
 import { stageCalculations } from '../Containers/AddMealModule/FoodMetrics'
 import { MessageActions } from '../Redux/MessageRedux'
 import { getMealsOfDate } from '../Redux/Selectors'
@@ -16,13 +17,13 @@ export function * watchCommandToExecute (action) {
 // Our worker Saga: will perform the async increment task
 export function * handleCommand (action) {
   const {command} = action
-  const commandWithValue = command.split(' ')
-  const onlyCommand = commandWithValue[0]
-  switch (onlyCommand) {
+  const parsedCommand = Common.parseCommand(command)
+
+  switch (parsedCommand.command) {
     // Send meals of day either way (complete or incomplete)
     case 'tracked-day-complete':
     case 'tracked-day-incomplete':
-      let day = commandWithValue[1]
+      let day = command.value
       const meals = yield select(getMealsOfDate, day)
       // Only send tracked day to server if it contains meals
       if (meals.length > 0) {

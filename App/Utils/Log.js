@@ -16,7 +16,8 @@ const logTrackingEvents = false
 
 let trackActivities = false
 
-let userIdShared = false
+let userIdSharedWithCrashlytics = false
+let userIdSharedWithUserTracking = false
 
 export default class Log {
   constructor (name) {
@@ -58,6 +59,11 @@ export default class Log {
   // Example: ProblemState, JSON...[, 0]
   problem (action = 'UNKNOWN', label = 'UNKNOWN', value = 0) {
     if (trackActivities) {
+      if (!userIdSharedWithUserTracking && Log.userId !== undefined) {
+        userIdSharedWithUserTracking = true
+        this.action('User', 'Identifier', Log.userId)
+      }
+
       if (logTrackingEvents) {
         console.info('[TRACKING] Problem: ' + action + ' ' + label + ' ' + value)
       }
@@ -71,6 +77,11 @@ export default class Log {
   // Example: GUIAction, ToggleMenu, false[, 0]
   action (category = 'UNDEFINED', action = 'UNKNOWN', label = 'UNKNOWN', value = 0) {
     if (trackActivities) {
+      if (!userIdSharedWithUserTracking && Log.userId !== undefined) {
+        userIdSharedWithUserTracking = true
+        this.action('User', 'Identifier', Log.userId)
+      }
+
       if (logTrackingEvents) {
         console.info('[TRACKING] Action: ' + category + ' ' + action + ' ' + label + ' ' + value)
       }
@@ -108,8 +119,8 @@ export default class Log {
 
     // Care for CRASHLYTICS logging
     if (defaultLevel === LEVEL_VALUES.CRASHLYTICS) {
-      if (!userIdShared && Log.userId !== undefined) {
-        userIdShared = true
+      if (!userIdSharedWithCrashlytics && Log.userId !== undefined) {
+        userIdSharedWithCrashlytics = true
         Crashlytics.setUserIdentifier(Log.userId)
       }
       let messages = Array.prototype.slice.call(messageArguments)
@@ -179,7 +190,7 @@ export default class Log {
                 messagePart = '[Other] ' + messageToDisplay
               }
             } catch (error) {
-              if (message.toString !== undefined || message.toString !== null) {
+              if (message !== undefined && message !== null && (message.toString !== undefined || message.toString !== null)) {
                 messagePart = '[Other] ' + message.toString()
               } else {
                 messagePart = '[Other] <non stringifyable object>'

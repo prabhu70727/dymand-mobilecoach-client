@@ -56,16 +56,21 @@ export default class HeaderBar extends Component {
 
   render () {
     return (
-      <View style={[styles.header, this.props.containerStyle]}>
-        <Text style={styles.title}>{this.props.title}</Text>
-        {this.renderBackIcon()}
-        {this.renderCloseIcon()}
+      <View style={[styles.container, this.props.containerStyle]}>
+        <View style={styles.header}>
+          <Text style={styles.title}>{this.props.title}</Text>
+          {this.renderBackIcon()}
+          {this.renderCloseIcon()}
+        </View>
       </View>
     )
   }
 }
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: Colors.navigationBar.background
+  },
   header: {
     height: Metrics.navbarHeight,
     ...Platform.select({
@@ -79,7 +84,6 @@ const styles = StyleSheet.create({
     ...ifIphoneX({
       marginTop: 40
     }),
-    backgroundColor: Colors.navigationBar.background,
     alignSelf: 'stretch',
     justifyContent: 'center',
     alignItems: 'center',

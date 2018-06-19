@@ -1,22 +1,16 @@
 import React, { Component } from 'react'
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image
-} from 'react-native'
-import {ifIphoneX} from 'react-native-iphone-x-helper'
-
+import { StyleSheet, Text, View, Image } from 'react-native'
+import { ifIphoneX } from 'react-native-iphone-x-helper'
 import { connect } from 'react-redux'
+
 import NextButton from '../../Components/NextButton'
 import I18n from '../../I18n/I18n'
 import SettingsActions from '../../Redux/SettingsRedux'
 import MessageActions from '../../Redux/MessageRedux'
 import { Colors, Images, Metrics } from '../../Themes/'
-
 import GUIActions from '../../Redux/GUIRedux'
 
-class ScreenFour extends Component {
+class ScreenWelcomeByCoach extends Component {
   completeTutorial = () => {
     const {completeTutorial, sendGoIntention, enableSidemenuGestures} = this.props
     completeTutorial(true)
@@ -57,7 +51,7 @@ const mapStateToDispatch = dispatch => ({
   enableSidemenuGestures: () => dispatch(GUIActions.enableSidemenuGestures())
 })
 
-export default connect(mapStateToProps, mapStateToDispatch)(ScreenFour)
+export default connect(mapStateToProps, mapStateToDispatch)(ScreenWelcomeByCoach)
 
 const Styles = StyleSheet.create({
   container: {flex: 1, alignItems: 'center', flexDirection: 'column', backgroundColor: Colors.onboarding.background},

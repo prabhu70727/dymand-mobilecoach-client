@@ -2,18 +2,21 @@
 // TODO for improvement check: https://github.com/idibidiart/react-native-responsive-grid/blob/master/UniversalTiles.md
 
 import React, { Component } from 'react'
-import { Alert, Text, View, StyleSheet, ScrollView } from 'react-native'
-import { Crashlytics } from 'react-native-fabric'
+import { Text, View, StyleSheet, ScrollView, Platform, Share } from 'react-native'
 import ParsedText from 'react-native-parsed-text'
 import { connect } from 'react-redux'
+import KeyboardSpacer from 'react-native-keyboard-spacer'
 
 // import { NavigationActions } from 'react-navigation'
 import {Colors} from '../../Themes/'
 import PMNavigationBar from '../../Components/Navbar'
 import I18n from '../../I18n/I18n'
-import { Card, Divider } from 'react-native-elements'
+import { Card } from 'react-native-elements'
 import NextButton from '../../Components/NextButton'
+import ServerMessageActions from '../../Redux/MessageRedux'
 import PDFGenerator from '../../Utils/PDFGenerator'
+import AppConfig from '../../Config/AppConfig'
+import FeedbackForm from './FeedbackForm'
 
 import Log from '../../Utils/Log'
 const log = new Log('Containers/Settings/Settings')
@@ -34,6 +37,23 @@ class Settings extends Component {
     pdfGenerator.createPDF(this.props.foodDiary)
   }
 
+  onSendFeedback (name, email, feedback) {
+    log.info('User submitted Feedback Form')
+    const {wholeState} = this.props
+    // convert messages objects to arrays, and shorten them to last 20 messages
+    // also filter out send-feedback intention to prevent 'cascadic'-memory leak
+    const messagesArray = Object.values(wholeState.messages).slice(-20).filter(message => message['user-intention'] !== 'send-app-feedback')
+
+    const giftedChatMessagesArray = Object.values(wholeState.giftedchatmessages).reverse().slice(-20)
+    // Shorten Message Arrays of state to last 20 messages
+    const debugState = {
+      ...wholeState,
+      messages: messagesArray,
+      giftedchatmessages: giftedChatMessagesArray
+    }
+    this.props.sendFeedback({name, email, feedback, state: debugState})
+  }
+
   render () {
     const { openURL } = this.props.screenProps
     return (
@@ -48,64 +68,20 @@ class Settings extends Component {
               <NextButton
                 styleButton={styles.button}
                 styleText={styles.buttonText}
-                text={I18n.t('Settings.restart')}
-                onPress={() => {
-                  log.action('App', 'ResetQuery')
-                  Alert.alert(
-                      I18n.t('Settings.reallyRestart'),
-                      '',
-                    [
-                      {text: I18n.t('Settings.no'), onPress: () => {}, style: 'cancel'},
-                      {text: I18n.t('Settings.yes'),
-                        onPress: () => {
-                          // dispatch({type: 'RESET'})
-                          // this.props.navigation.dispatch(resetAction)
-                          log.action('App', 'Reset')
-                          Alert.alert(
-                          'Under construction 👷',
-                          'Bitte für Neustart die App löschen und neu installieren',
-                            [
-                            {text: 'Ok', onPress: () => true}
-                            ],
-                          { cancelable: false }
-                        )
-                        }
-                      }
-                    ],
-                      { cancelable: false }
-                    )
-                }}
-                />
-            </View>
-
-            <Divider style={{ backgroundColor: '#e1e8ee' }} />
-
-            <View key={2}>
-              <NextButton
-                styleButton={styles.button}
-                styleText={styles.buttonText}
-                text={I18n.t('Settings.exportDiary')}
-                onPress={() => this.onExportDiary()}
-                />
-            </View>
-
-            <Divider style={{ backgroundColor: '#e1e8ee' }} />
-
-            <View key={3}>
-              <NextButton
-                styleButton={styles.button}
-                styleText={styles.buttonText}
                 text={I18n.t('Settings.recommend')}
                 onPress={() => {
-                  log.action('App', 'Share')
-                  Alert.alert(
-                    'Under construction 👷',
-                    '',
-                    [
-                      {text: 'Ok', onPress: () => true}
-                    ],
-                    { cancelable: false }
-                  )
+                  const shareUrl = AppConfig.config[AppConfig.project].shareUrl[I18n.locale.toLowerCase()]
+                  // TODO: Update URL
+                  Share.share({
+                    message: I18n.t('Settings.share.text') + ': ' + shareUrl,
+                    url: shareUrl,
+                    title: I18n.t('Settings.share.title')
+                  }, {
+                    // Android only:
+                    dialogTitle: I18n.t('Settings.share.title'),
+                    // iOS only:
+                    excludedActivityTypes: []
+                  })
                 }}
                 />
             </View>
@@ -149,40 +125,15 @@ class Settings extends Component {
               </ParsedText>
             </View>
           </Card>
-
           <Card
-            title='Entwicklung'
+            title={I18n.t('Settings.feedbackForm.title')}
             titleStyle={styles.cardTitle}
             containerStyle={{marginBottom: 20}}
             >
-            <View key={1}>
-              <NextButton
-                styleButton={styles.button}
-                styleText={styles.buttonText}
-                text={I18n.t('Settings.debugReport')}
-                onPress={() => {
-                  log.problem('ProblemState', JSON.stringify(this.props.wholeState))
-                  log.error('State reported as incorrect by user!')
-                  Alert.alert(
-                    'Vielen Dank! 👍',
-                    'Die App wird nun nach der Auswahl von "Ok" beendet. Bitte starten sie die App danach nochmals, damit der Fehlerbericht im Hintergrund versendet werden kann. Danach kann die App wieder normal verwendet werden.',
-                    [
-                      {text: 'Ok',
-                        onPress: () => {
-                          if (!__DEV__) {
-                            Crashlytics.crash()
-                          }
-                          return true
-                        }
-                      }
-                    ],
-                    { cancelable: false }
-                  )
-                }}
-                />
-            </View>
+            <FeedbackForm onSubmit={(name, email, feedback) => this.onSendFeedback(name, email, feedback)} onFeedbackFocus={() => { if (this.refs.scrollView && Platform.OS === 'ios') this.refs.scrollView.scrollToEnd() }} />
           </Card>
         </ScrollView>
+        {(Platform.OS === 'ios') ? <KeyboardSpacer /> : null}
       </View>
     )
   }
@@ -195,7 +146,11 @@ const mapStateToProps = (state) => {
   }
 }
 
-export default connect(mapStateToProps)(Settings)
+const mapStateToDispatch = dispatch => ({
+  sendFeedback: (content) => dispatch(ServerMessageActions.sendIntention(null, 'send-app-feedback', content))
+})
+
+export default connect(mapStateToProps, mapStateToDispatch)(Settings)
 
 const styles = StyleSheet.create({
   url: {
@@ -207,6 +162,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10
   },
+  // paragraph: {
+  //   fontSize: Fonts.size.small,
+  //   color: Colors.main.paragraph
+  // },
   container: {
     flex: 1,
     backgroundColor: Colors.main.appBackground

@@ -46,7 +46,8 @@ class Menu extends Component {
         label: 'Menu.Diary',
         leftIcon: <View style={styles.circle}><Icon name='ios-nutrition' style={styles.actionButtonIcon} /></View>,
         subtitle: '',
-        modal: false
+        modal: false,
+        navigationOptions: {initialTab: 0}
       },
       settings: {
         name: 'Settings',
@@ -84,26 +85,12 @@ class Menu extends Component {
   }
 
   onPressHandler (screen) {
-    const { storyProgress } = this.props
-
     log.action('GUI', 'ScreenChange', screen.name)
-
     // Store the screen in visited screens
-    // this.props.visitScreen({visitedScreen: screen})
-    // Check if user navigates back to chat, to notify server which screens where visitedScreens
-    if (screen.name === 'Chat') {
-      if (storyProgress.visitedScreens.includes('Backpack')) this.props.sendIntention(null, 'backpack-opened', null)
-      if (storyProgress.visitedScreens.includes('Tour')) this.props.sendIntention(null, 'tour-opened', null)
-      if (storyProgress.visitedScreens.includes('FoodDiary')) this.props.sendIntention(null, 'diary-opened', null)
-      if (storyProgress.visitedScreens.includes('Pyramid')) this.props.sendIntention(null, 'pyramid-opened', null)
-      // clear visited screens again
-      this.props.resetVisitedScreens()
-    } else {
-      if (screen.name === 'Backpack') this.props.visitScreen('Backpack')
-      if (screen.name === 'FoodDiary') this.props.visitScreen('FoodDiary')
-      if (screen.name === 'Tour') this.props.visitScreen('Tour')
-    }
-    this.props.onItemSelected({screen: screen.name, modal: screen.modal})
+    if (screen.name === 'Backpack') this.props.visitScreen('backpack')
+    if (screen.name === 'FoodDiary') this.props.visitScreen('diary')
+    if (screen.name === 'Tour') this.props.visitScreen('tour')
+    this.props.onItemSelected({screen: screen.name, modal: screen.modal, navigationOptions: screen.navigationOptions})
   }
 
   render () {

@@ -155,10 +155,10 @@ export default class TextOrNumberInputBubble extends Component {
                 value={this.state.text}
                 multiline={multiline}
                 placeholder={placeholder}
-                placeholderTextColor={Colors.optionDisabled}
+                placeholderTextColor={Colors.buttons.freeText.text}
                 keyboardType={this.onlyNumbers ? 'numeric' : 'default'}
                 underlineColorAndroid='rgba(0,0,0,0)'
-                style={[styles.textInput, {paddingLeft, textAlign, flex: 0, flexShrink: 1, borderBottomWidth: 0.8, borderColor: Colors.optionDisabled, width: this.state.inputWidth, height: this.state.inputHeight}, multiline ? {borderBottomWidth: 0} : null]}
+                style={[styles.textInput, {paddingLeft, textAlign, flex: 0, flexShrink: 1, borderBottomWidth: 0.8, borderColor: Colors.buttons.freeText.text, width: this.state.inputWidth, height: this.state.inputHeight}]}
                 autoCapitalize={'sentences'}
                 returnKeyType={'done'}
                 autoCorrect={false}

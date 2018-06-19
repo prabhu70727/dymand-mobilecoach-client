@@ -16,9 +16,6 @@ I18n.fallbacks = true
 // Add different defaultLocale here (default is 'en'). It will be used as a fallback when device locale isn't found in translations
 I18n.defaultLocale = 'en'
 
-// Use device language as default language
-I18n.locale = I18n.locale.substr(0, 2)
-
 // English language is the main fallback language
 I18n.translations = {
   en: require('./languages/english.json'),
@@ -26,6 +23,9 @@ I18n.translations = {
   fr: require('./languages/fr.json'),
   it: require('./languages/it.json')
 }
+
+// Use device language as default language if available as translation, otherwise default language
+I18n.locale = I18n.translations.hasOwnProperty(I18n.locale.substr(0, 2)) ? I18n.locale.substr(0, 2) : I18n.defaultLocale
 
 // Set base locale also for moment
 moment.locale(I18n.currentLocale())

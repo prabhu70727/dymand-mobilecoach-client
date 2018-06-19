@@ -3,14 +3,20 @@ import { addNavigationHelpers } from 'react-navigation'
 import { View, BackHandler, Linking } from 'react-native'
 import { connect } from 'react-redux'
 import Toast, {DURATION} from 'react-native-easy-toast'
-import AppNavigation from './AppNavigation'
 import SideMenu from 'react-native-side-menu'
+import RNExitApp from 'react-native-exit-app'
+
+import AppConfig from '../Config/AppConfig'
+import AppNavigation from './AppNavigation'
 import GUIActions from '../Redux/GUIRedux'
 import {Colors} from '../Themes'
 import Menu from '../Components/Menu'
 import ModalContent from '../Containers/ModalContent'
+import { initialRouteName } from '../Containers/Onboarding/OnboardingNav'
 import I18n from '../I18n/I18n'
 import LoadingOverlay from '../Components/LoadingOverlay'
+import StoryProgressActions from '../Redux/StoryProgressRedux'
+import ServerMessageActions from '../Redux/MessageRedux'
 
 import Log from '../Utils/Log'
 const log = new Log('Navigation/ReduxNavigation')
@@ -60,25 +66,35 @@ class ReduxNavigation extends Component {
       this.hideModal()
       return true
     }
-    // If we're not in Chat-Screen or in Onboarding ScreenOne
-    if (currentScreen !== 'Chat' && currentScreen !== 'ScreenOne') {
-      // Navigate back to last Screen
-      navigation.goBack(null)
+    // If we're not in Chat-Screen or in first onboarding screen
+    if (currentScreen !== 'Chat' && currentScreen !== initialRouteName) {
+      // Navigate back to last Screen if back button is active in onboarding or we already left onboarding
+      if (AppConfig.config.startup.backButtonInOnboardingEnabled || this.props.tutorialCompleted) {
+        const {visitedScreens} = this.props.storyProgress
+        if (visitedScreens.length > 0) {
+          visitedScreens.forEach(screen => {
+            dispatch(ServerMessageActions.sendIntention(null, screen + '-opened', null))
+          })
+          // clear visited screens again
+          dispatch(StoryProgressActions.resetVisitedScreens())
+        }
+        navigation.goBack(null)
+      }
       return true
     // If we already are in Chat, show Tast or close App
     } else {
       // If the back button already has been pressed before, exit the app
       if (this.enableClose) {
         log.info('Back Button pressed twice: Leaving App.')
-        BackHandler.exitApp()
+        RNExitApp.exitApp()
         return true
       } else {
         // Enable close for 2 seconds
         log.info('Back Button pressed once: Enabling exit option.')
         this.enableClose = true
         this.disableCloseAfter2Seconds()
-        // TODO: internationalisation
-        this.refs.toast.show('Zweimal drücken zum Beenden der App', 2000)
+
+        this.refs.toast.show(I18n.t('Common.backButton'), 2000)
         return true
       }
     }
@@ -146,7 +162,7 @@ class ReduxNavigation extends Component {
     }, cb)
   }
 
-  onMenuItemSelected = ({screen = null, modal = true}) => {
+  onMenuItemSelected = ({screen = null, modal = true, navigationOptions = {}}) => {
     const { dispatch, nav } = this.props
     const navigation = addNavigationHelpers({
       dispatch,
@@ -166,7 +182,7 @@ class ReduxNavigation extends Component {
     if (modal) {
       this.setModal(!this.state.modal.visible, screen)
     } else {
-      navigation.navigate(screen)
+      navigation.navigate(screen, navigationOptions)
     }
   }
 
@@ -236,7 +252,9 @@ const mapStateToProps = state => ({
   nav: state.nav,
   language: state.settings.language,
   sideMenuOpen: state.guistate.sideMenuOpen,
-  sideMenuGestures: state.guistate.sideMenuGestures
+  sideMenuGestures: state.guistate.sideMenuGestures,
+  tutorialCompleted: state.settings.tutorialCompleted,
+  storyProgress: state.storyProgress
 })
 
 export default connect(mapStateToProps)(ReduxNavigation)

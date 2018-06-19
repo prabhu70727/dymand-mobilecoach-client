@@ -48,7 +48,7 @@ export default class Likert extends Component {
           }}
         >
           <View style={itemStyle}>
-            <Text style={{color: Colors.buttons.common.text}}>{option.value}</Text>
+            {this.renderValue(option, itemStyle)}
           </View>
           {this.renderLabel(option, itemSize, index, length, alternativeLayout)}
         </TouchableOpacity>
@@ -94,6 +94,14 @@ export default class Likert extends Component {
     }
   }
 
+  renderValue (option) {
+    if (!this.props.currentMessage.custom.options.silent) {
+      return (
+        <Text style={{color: Colors.buttons.common.text}}>{option.value}</Text>
+      )
+    }
+  }
+
   renderLabel (option, itemSize, index, length, alternativeLayout) {
     if (this.shouldRenderLabel(index, length, alternativeLayout)) {
       return (
@@ -115,15 +123,15 @@ export default class Likert extends Component {
 
   render () {
     const {currentMessage, onPress} = this.props
-    const {options} = currentMessage.custom
+    const {answers} = currentMessage.custom.options
     const maxWidth = 50
-    let itemSize = (Metrics.screenWidth - 40) / options.length
+    let itemSize = (Metrics.screenWidth - 40) / answers.length
     if (itemSize > maxWidth) itemSize = maxWidth
     // const isLast = currentMessage.isLast
 
     return (
       <View style={[inputMessageStyles.container, {flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start'}]}>
-        {options.map((option, index, array) => {
+        {answers.map((option, index, array) => {
           return this.renderItem(option, itemSize, onPress, index, array.length)
         })}
       </View>

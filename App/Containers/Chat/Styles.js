@@ -42,18 +42,3 @@ export const TextBubbleStyle = {
     }
   }
 }
-
-export const CustomBubbleStyle = {
-  wrapperStyle: {
-    left: {
-      backgroundColor: 'transparent',
-      alignSelf: 'stretch',
-      marginRight: 0
-    },
-    right: {
-      backgroundColor: 'transparent',
-      alignSelf: 'stretch',
-      marginLeft: 0
-    }
-  }
-}

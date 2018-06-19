@@ -2,7 +2,7 @@ import { takeEvery, all, fork } from 'redux-saga/effects'
 
 /* ------------- Actions ------------- */
 
-import { HydrateActions } from '../Redux/HydrateRedux'
+import { StartupActions } from '../Redux/StartupRedux'
 import { GUIActions } from '../Redux/GUIRedux'
 import { MessageActions } from '../Redux/MessageRedux'
 import { SettingsActions } from '../Redux/SettingsRedux'
@@ -11,7 +11,7 @@ import { SettingsActions } from '../Redux/SettingsRedux'
 
 import { initializeGiftedChat, loadEarlierMessages, watchNewOrUpdatedMessageForGiftedChat } from './GiftedChatMessageSaga'
 import { sendMessage, sendInvisibleMessage, sendIntention, sendVariableValue, disableMessage, executeCommand, watchMessageUpdateChannel } from './MessageSagas'
-import { initializeServerSync, handleNewClientCreatedMessages, watchConnectionStateChannel, watchIncomingMessageChannel, watchOutgoingMessageChannel } from './ServerSyncSagas'
+import { initializeServerSync, handleCommands, handleNewClientCreatedMessages, watchConnectionStateChannel, watchIncomingMessageChannel, watchOutgoingMessageChannel } from './ServerSyncSagas'
 import { updateLanguage } from './SettingsSagas'
 import { watchCommandToExecute } from './FoodDiarySaga'
 
@@ -32,7 +32,7 @@ export default function * root () {
     yield fork(watchCommandToExecute),
 
     // Gifted Chat (top layer)
-    takeEvery(HydrateActions.SIGNAL_STORAGE_LOADED, initializeGiftedChat),
+    takeEvery(StartupActions.STARTUP, initializeGiftedChat),
     takeEvery(GUIActions.LOAD_EARLIER, loadEarlierMessages),
 
     yield fork(watchNewOrUpdatedMessageForGiftedChat),
@@ -48,7 +48,9 @@ export default function * root () {
     yield fork(watchMessageUpdateChannel),
 
     // Server Sync (bottom layer)
-    takeEvery(HydrateActions.SIGNAL_STORAGE_LOADED, initializeServerSync),
+    takeEvery(StartupActions.STARTUP, initializeServerSync),
+    takeEvery(StartupActions.MANUALLY_CONNECT, initializeServerSync),
+    takeEvery(MessageActions.COMMAND_TO_EXECUTE, handleCommands),
     takeEvery(MessageActions.ADD_OR_UPDATE_MESSAGE, handleNewClientCreatedMessages),
 
     yield fork(watchConnectionStateChannel),

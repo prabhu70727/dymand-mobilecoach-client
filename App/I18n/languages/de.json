@@ -16,6 +16,7 @@
     "title": "Chat mit {{coach}}",
     "placeholder": "Bitte Nachricht eingeben",
     "loadEarlier": "Ältere Mitteilungen anzeigen",
+    "emptyChatMessage": "Der Coach wird sich in Kürze mit dir in Verbindung setzen.",
     "send": "Senden"
   },
   "ConnectionStates": {
@@ -324,6 +325,15 @@
     "recommend": "App weiter empfehlen",
     "impressumText": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.",
     "debugReport": "Fehlerhaften Stand melden",
+    "feedbackForm": {
+      "title": "Feedback",
+      "emailInput": "Email Adresse für Rückfragen (optional)",
+      "feedbackInput": "Feedback/Fehlerbeschreibung",
+      "nameInput": "Name (optional)",
+      "submit": "Senden",
+      "submitMessage": "Merci. Ihr Feedback hilft uns dabei, die App weiter zu verbessern.",
+      "errorMessage": "Bitte ein Feedback eingeben."
+    },
     "impressum": {
       "title1": "Text 1",
       "copytext1": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.",
@@ -336,12 +346,12 @@
     }
   },
   "Backpack": {
-    "header": "Mein Rucksack"
+    "header": "Meine Info-Bibliothek"
   },
   "Menu": {
     "Chat": "Chat",
     "Tour": "Karte",
-    "Backpack": "Rucksack",
+    "Backpack": "Bibliothek",
     "Diary": "Tagebuch",
     "Settings": "Einstellungen",
     "Recipes": "Rezepte",
@@ -349,6 +359,7 @@
   "Common": {
     "confirm": "Bestätigen",
     "abort": "Abbrechen",
+    "answerExpired": "Antwortzeit abgelaufen",
     "invalid": "Ungültiger Wert",
     "validationError": "Bitte trage einen gültigen Wert ein.",
     "ok": "OK",
@@ -356,10 +367,12 @@
     "chooseAtLeastOne": "Bitte wähle mindestens eine Option.",
     "chooseDate": "Datum auswählen",
     "today": "heute",
+    "thanks": "Vielen Dank!",
     "yesterday": "gestern",
     "and": "und",
     "datePicker": {
       "outOfRange": "Bitte wählen Sie einen Zeitpunkt zwischen"
-    }
+    },
+    "backButton": "Zweimal drücken zum Beenden der App"
   }
  }

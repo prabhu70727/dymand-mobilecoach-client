@@ -1,6 +1,8 @@
 import { createReducer, createActions } from 'reduxsauce'
 import Immutable from 'seamless-immutable'
 import update from 'immutability-helper'
+
+import Common from '../Utils/Common'
 import { MessageActions } from './MessageRedux'
 
 const { Types, Creators } = createActions({
@@ -14,12 +16,12 @@ export default Creators
 export const INITIAL_STATE = Immutable({})
 
 export const handleCacheTextCommand = (state, {command, content}) => {
-  const commandWithValue = command.split(' ')
-  const onlyCommand = commandWithValue[0]
-  switch (onlyCommand) {
+  const parsedCommand = Common.parseCommand(command)
+
+  switch (parsedCommand.command) {
     // Add a complete day to the current trackingPeriod
     case 'cache-text':
-      let id = commandWithValue[1]
+      let id = parsedCommand.value
       return update(state, {
         [id]: {$set: content}
       })

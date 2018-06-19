@@ -16,8 +16,6 @@ import {MessageStates} from '../Redux/MessageRedux'
  */
 
 const { Types, Creators } = createActions({
-  // This action will be handled by GiftedChatMessageSaga only
-  giftedChatInitialized: [],
   // This action will directly add or update the new message in the redux-store
   giftedChatAddMessage: ['message', 'addToStart'],
   // Update giftedchat messages relating to the given server message
@@ -83,10 +81,18 @@ export const giftedChatUpdateMessages = (state, { serverMessage }) => {
     }
 
     // If message is answered don't render it (anymore)
-    if (oldMsg.type !== 'text' && (serverMessage['client-status'] === MessageStates.ANSWERED_ON_CLIENT || serverMessage['client-status'] === MessageStates.ANSWERED_AND_PROCESSED_BY_SERVER || serverMessage['client-status'] === MessageStates.NOT_ANSWERED_AND_PROCESSED_BY_SERVER)) {
+    if (oldMsg.type !== 'text' && (serverMessage['client-status'] === MessageStates.ANSWERED_ON_CLIENT || serverMessage['client-status'] === MessageStates.ANSWERED_AND_PROCESSED_BY_SERVER)) {
       newMsg['custom'] = {
         ...newMsg['custom'],
         visible: false
+      }
+    }
+
+    // If message is not answered render it differently
+    if (oldMsg.type !== 'text' && serverMessage['client-status'] === MessageStates.NOT_ANSWERED_AND_PROCESSED_BY_SERVER) {
+      newMsg['custom'] = {
+        ...newMsg['custom'],
+        unanswered: true
       }
     }
 
