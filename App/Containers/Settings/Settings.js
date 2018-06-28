@@ -151,7 +151,7 @@ class Settings extends Component {
           </Card>
 
           <Card
-            title='Entwicklung'
+            title='Development'
             titleStyle={styles.cardTitle}
             containerStyle={{marginBottom: 20}}
             >
@@ -164,8 +164,8 @@ class Settings extends Component {
                   log.problem('ProblemState', JSON.stringify(this.props.wholeState))
                   log.error('State reported as incorrect by user!')
                   Alert.alert(
-                    'Vielen Dank! 👍',
-                    'Die App wird nun nach der Auswahl von "Ok" beendet. Bitte starten sie die App danach nochmals, damit der Fehlerbericht im Hintergrund versendet werden kann. Danach kann die App wieder normal verwendet werden.',
+                    'Thank you! 👍',
+                    'The app will now stop after selecting "Ok". Please restart the app afterwards, so that the error report can be sent in the background. After that, the app can be used normally again.',
                     [
                       {text: 'Ok',
                         onPress: () => {

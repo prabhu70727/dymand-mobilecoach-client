@@ -22,6 +22,10 @@ class ScreenTwo extends Component {
       <View style={Styles.container}>
         <View style={Styles.containerMargin} />
         <View style={Styles.buttonContainer}>
+          <NextButton text='English' onPress={() => {
+            changeLanguage('en-GB')
+            navigate('ScreenThree')
+          }} />
           <NextButton text='Deutsch' onPress={() => {
             changeLanguage('de-CH')
             navigate('ScreenThree')

@@ -53,12 +53,12 @@ export default {
       incrementShownMessagesBy: 25
     },
     serverSync: {
-      useLocalServer: false,
+      useLocalServer: true,
       clientVersion: 1,
       role: 'participant',
       defaultNickname: 'Whitelabel App User',
-      interventionPattern: '----',
-      interventionPassword: '----',
+      interventionPattern: 'Test Intervention',
+      interventionPassword: 'interventionPassword',
       androidSenderId: '123456789012',
       localDeepstreamURL: 'ws://127.0.0.1:6020/deepstream',
       localRestURL: 'http://127.0.0.1:8080/PMCP/api/v02/',
