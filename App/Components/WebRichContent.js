@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import { View, WebView, StyleSheet, Platform } from 'react-native'
+import KeyboardSpacer from 'react-native-keyboard-spacer'
 
 import HeaderBar from './HeaderBar'
 
-const websiteStart = '<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><link href="css/normalize.css" rel="stylesheet" media="all"><link href="css/styles.css" rel="stylesheet" media="all"></head><body>'
+const websiteStart = '<html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><link href="css/normalize.css" rel="stylesheet" media="all"><link href="css/styles.css" rel="stylesheet" media="all"></head><body>'
 const websiteEnd = '</body></html>'
 
 // const REL_IMAGE_DEBUG = '<img class="fill" src="images/voll-fett.png"/>'
@@ -31,6 +32,7 @@ export default class WebRichContent extends Component {
             javaScriptEnabled={false}
             domStorageEnabled={false}
             />
+          {Platform.OS === 'android' ? <KeyboardSpacer /> : null}
         </View>
       </View>
     )

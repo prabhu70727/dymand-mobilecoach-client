@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import ServerMessageActions from '../Redux/MessageRedux'
 import StoryProgressActions from '../Redux/StoryProgressRedux'
 import { Images, Colors } from '../Themes/'
+import {badgeStyles} from './Badge'
 
 import Log from '../Utils/Log'
 const log = new Log('Components/Menu')
@@ -25,7 +26,8 @@ class Menu extends Component {
         name: 'Chat',
         label: 'Menu.Chat',
         leftIcon: <View style={styles.circle}><Icon name='ios-nutrition' style={styles.actionButtonIcon} /></View>,
-        modal: false
+        modal: false,
+        badge: () => this.getChatBadge()
       },
       tour: {
         name: 'Tour',
@@ -46,7 +48,8 @@ class Menu extends Component {
         label: 'Menu.Diary',
         leftIcon: <View style={styles.circle}><Icon name='ios-nutrition' style={styles.actionButtonIcon} /></View>,
         subtitle: '',
-        modal: false
+        modal: false,
+        navigationOptions: {initialTab: 0}
       },
       settings: {
         name: 'Settings',
@@ -62,6 +65,19 @@ class Menu extends Component {
         subtitle: '',
         modal: false
       }
+    }
+  }
+
+  getChatBadge () {
+    if (this.props.unreadMessages === 0) return null
+    else {
+      let value = this.props.unreadMessages
+      if (value > 99) value = '99+'
+      return ({
+        value,
+        textStyle: badgeStyles.textStyle,
+        containerStyle: badgeStyles.containerStyle
+      })
     }
   }
   // remember the screens visited before returning to chat
@@ -84,26 +100,12 @@ class Menu extends Component {
   }
 
   onPressHandler (screen) {
-    const { storyProgress } = this.props
-
     log.action('GUI', 'ScreenChange', screen.name)
-
     // Store the screen in visited screens
-    // this.props.visitScreen({visitedScreen: screen})
-    // Check if user navigates back to chat, to notify server which screens where visitedScreens
-    if (screen.name === 'Chat') {
-      if (storyProgress.visitedScreens.includes('Backpack')) this.props.sendIntention(null, 'backpack-opened', null)
-      if (storyProgress.visitedScreens.includes('Tour')) this.props.sendIntention(null, 'tour-opened', null)
-      if (storyProgress.visitedScreens.includes('FoodDiary')) this.props.sendIntention(null, 'diary-opened', null)
-      if (storyProgress.visitedScreens.includes('Pyramid')) this.props.sendIntention(null, 'pyramid-opened', null)
-      // clear visited screens again
-      this.props.resetVisitedScreens()
-    } else {
-      if (screen.name === 'Backpack') this.props.visitScreen('Backpack')
-      if (screen.name === 'FoodDiary') this.props.visitScreen('FoodDiary')
-      if (screen.name === 'Tour') this.props.visitScreen('Tour')
-    }
-    this.props.onItemSelected({screen: screen.name, modal: screen.modal})
+    if (screen.name === 'Backpack') this.props.visitScreen('backpack')
+    if (screen.name === 'FoodDiary') this.props.visitScreen('diary')
+    if (screen.name === 'Tour') this.props.visitScreen('tour')
+    this.props.onItemSelected({screen: screen.name, modal: screen.modal, navigationOptions: screen.navigationOptions})
   }
 
   render () {
@@ -125,7 +127,7 @@ class Menu extends Component {
                 title={I18n.t(l.label, {locale: this.props.language})}
                 // subtitle={l.subtitle}
                 hideChevron
-                // badge={{value: 3, containerStyle: styles.badge}}
+                badge={l.badge ? l.badge() : null}
                 titleStyle={{color: Colors.sideMenu.text}}
               />
             ))
@@ -144,7 +146,8 @@ const mapStateToProps = (state) => {
   return {
     language: state.settings.language,
     storyProgress: state.storyProgress,
-    coach: state.settings.coach
+    coach: state.settings.coach,
+    unreadMessages: state.guistate.unreadMessages
   }
 }
 
@@ -187,9 +190,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15
-  },
-  badge: {
-    backgroundColor: Colors.buttons.common.background
   },
   image: {flex: 1, alignSelf: 'stretch', resizeMode: 'contain'}
 })

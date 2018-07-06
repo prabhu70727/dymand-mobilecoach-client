@@ -111,7 +111,7 @@ android {
     defaultConfig {
         applicationId "org.c4dhi.mobilecoach.client"
         minSdkVersion 16
-        targetSdkVersion 22
+        targetSdkVersion 26
         versionCode 0
         versionName "1.0.0000000000"
         ndk {
@@ -171,7 +171,9 @@ android {
 
 dependencies {
     compile fileTree(dir: "libs", include: ["*.jar"])
-
+    compile project(':react-native-exit-app')
+    compile project(':react-native-sensitive-info')
+    compile project(':react-native-video')
     compile project(':react-native-piwik')
     compile project(':react-native-file-viewer')
     compile project(':react-native-fetch-blob')
@@ -188,7 +190,7 @@ dependencies {
     compile project(':react-native-config')
 
     compile "com.android.support:appcompat-v7:23.0.1"
-    compile "com.facebook.react:react-native:+"  // From node_modules
+    compile ("com.facebook.react:react-native:0.52.0") { force = true }
 
     // ADDED FOR PUSH NOTIFICATIONS - START
     compile 'com.google.android.gms:play-services-gcm:+'

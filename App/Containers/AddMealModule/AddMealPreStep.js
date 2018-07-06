@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {View, StyleSheet, Alert, TouchableOpacity, Platform} from 'react-native'
+import {View, StyleSheet, Alert} from 'react-native'
 import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button'
 import Button from 'react-native-button'
 import PropTypes from 'prop-types'
@@ -73,7 +73,7 @@ class AddMealPreStep extends Component {
             value={this.mealPlaceOptions[0].value}
             fontSize={14}
             containerStyle={{
-              backgroundColor: Colors.buttons.common.background,
+              backgroundColor: Colors.main.primary,
               flex: 1,
               borderRadius: 5,
               marginTop: 10,
@@ -110,10 +110,11 @@ class AddMealPreStep extends Component {
       maxDate.second(59)
       maxDate.millisecond(0)
       let minDate = moment(maxDate)
-      // For some reason we only need to subtract 1 day for android date-picker
-      if (Platform.OS === 'ios') minDate = minDate.subtract(2, 'days').add(1, 'seconds')
-      // TODO: Check if this is working properly on different android devices!
-      else minDate = minDate.subtract(1, 'days')
+      minDate = minDate.subtract(1, 'days')
+      minDate.hour(0)
+      minDate.minute(0)
+      minDate.second(0)
+      minDate.millisecond(0)
       log.debug('Current locale for date picker:', moment.locale())
 
       return (
@@ -126,9 +127,11 @@ class AddMealPreStep extends Component {
               flexDirection: 'row',
               flex: 1}}
           >
+            {/* This view just hacks a 0.5 opacity 'underlay'-color beneath DatePicker-Component (because underlay-color can't be specified) */}
+            <View style={{position: 'absolute', top: 10, bottom: 0, left: 0, right: 0, borderRadius: 5, backgroundColor: 'rgba(82,110,124,0.5)'}} />
             <DatePicker
               style={{
-                backgroundColor: Colors.buttons.common.background,
+                backgroundColor: Colors.main.primary,
                 flex: 1,
                 borderRadius: 5,
                 marginTop: 10,
@@ -171,7 +174,6 @@ class AddMealPreStep extends Component {
               // ... You can check the source to find the other keys.
               }}
               onDateChange={(date) => this.onDateChange(date)}
-              TouchableComponent={TouchableOpacity}
              />
           </Animatable.View>
         </View>
@@ -197,7 +199,7 @@ class AddMealPreStep extends Component {
             index={i}
             isSelected={this.state[statePropertyName] === i}
             onPress={() => { this.onPressRadioButton(statePropertyName, i) }}
-            buttonInnerColor={Colors.buttons.common.background}
+            buttonInnerColor={Colors.main.primary}
             buttonOuterColor={Colors.buttons.common.background}
             buttonWrapStyle={{marginLeft: 10}}
           />
@@ -245,7 +247,7 @@ class AddMealPreStep extends Component {
                 containerStyle={styles.buttonContainer}
                 style={styles.button}
                 onPress={() => this.onConfirm()}>
-                Weiter
+                {I18n.t('Common.next')}
               </Button>
             </View>
           </Animatable.View>
@@ -257,8 +259,10 @@ class AddMealPreStep extends Component {
   onConfirm () {
     let mealPlace = MealPlaces.HOME
     let mealTime = new Date()
+    // Use state mealtime if option was selected
+    if (this.state.selectedMealTimeOption === 1) mealTime = this.state.mealTime
     // Convert mealtime to date-object
-    let m = moment(this.state.mealTime)
+    let m = moment(mealTime)
     // If day has been finally marked as complete / incomplete, dont allow to add a new meal..
     if (this.props.nonEditableDays.includes(m.format('DD.MM.YYYY'))) {
       Alert.alert(
@@ -271,7 +275,6 @@ class AddMealPreStep extends Component {
       )
     } else {
       if (this.state.selectedMealPlaceOption === 1) mealPlace = this.eatOutOption
-      if (this.state.selectedMealTimeOption === 1) mealTime = this.state.mealTime
       log.info('Creating new Meal: ' + mealPlace + ', ' + mealTime)
       // simultaniously fadeout blurview & cardview
       this.refs.blurview.animatable().fadeOut(350)

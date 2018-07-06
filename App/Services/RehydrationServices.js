@@ -1,54 +1,60 @@
 import { AsyncStorage } from 'react-native'
 import { persistStore } from 'redux-persist'
+import createEncryptor from 'redux-persist-transform-encrypt'
 
 import AppConfig from '../Config/AppConfig'
-import ReduxPersist from '../Config/ReduxPersist'
 import StartupActions from '../Redux/StartupRedux'
-import DebugConfig from '../Config/DebugConfig'
 import HydrateActions from '../Redux/HydrateRedux'
+import immutablePersistenceTransform from '../Services/ImmutablePersistenceTransform'
+// import JSONStorage from '../Utils/JSONStorage'
 
-const updateReducers = (store: Object) => {
-  const reducerVersion = ReduxPersist.reducerVersion
-  const config = ReduxPersist.storeConfig
-  const startup = () => store.dispatch(StartupActions.startup())
-  const signalStorageLoaded = () => store.dispatch(HydrateActions.signalStorageLoaded(true))
+import Log from '../Utils/Log'
+const log = new Log('Services/RehydrationServices')
 
-  // Check to ensure latest reducer version
-  AsyncStorage.getItem('reducerVersion').then((localVersion) => {
-    if (AppConfig.config.dev.purgeStoreAtStartup || localVersion !== reducerVersion) {
-      if (DebugConfig.useReactotron) {
-        console.tron.display({
-          name: 'PURGE',
-          value: {
-            'Old Version:': localVersion,
-            'New Version:': reducerVersion
-          },
-          preview: 'Reducer Version Change Detected',
-          important: true
-        })
+function updateReducers (reduxStore: Object, encryptionKey) {
+  const { encryptedReduxStorage, reduxStorageBlacklist } = AppConfig.config.storage
+
+  const startup = () => reduxStore.dispatch(StartupActions.startup())
+  const signalStorageLoaded = () => reduxStore.dispatch(HydrateActions.signalStorageLoaded(true))
+
+  let reduxConfig = null
+  let encryptor = null
+
+  if (encryptedReduxStorage) {
+    // Encrypted storage
+    log.debug('Creating encryptor...')
+    encryptor = createEncryptor({
+      secretKey: encryptionKey,
+      onError: function (error) {
+        log.error('Error with encryptor:', error)
       }
-      // Purge store
-      persistStore(store, config, () => {
-        signalStorageLoaded()
-        startup()
+    })
+
+    reduxConfig = { storage: AsyncStorage, blacklist: reduxStorageBlacklist, transforms: [immutablePersistenceTransform, encryptor] }
+  } else {
+    // UNencrypted storage
+    reduxConfig = { storage: AsyncStorage, blacklist: reduxStorageBlacklist, transforms: [immutablePersistenceTransform] }
+  }
+
+  // Check for required reset of the store
+  if (AppConfig.config.dev.purgeStoreAtStartup) {
+    // Purge store
+    persistStore(reduxStore, reduxConfig, () => {
+      if (AppConfig.config.dev.purgeStoreAtStartup) {
+        log.debug('Purging store...')
+        reduxStore.dispatch({type: 'RESET'})
       }
-      ).purge()
-      AsyncStorage.setItem('reducerVersion', reducerVersion)
-    } else {
-      persistStore(store, config, () => {
-        signalStorageLoaded()
-        startup()
-      }
-      )
-    }
-  }).catch(() => {
-    persistStore(store, config, () => {
+
       signalStorageLoaded()
       startup()
-    }
-    )
-    AsyncStorage.setItem('reducerVersion', reducerVersion)
-  })
+    })
+  } else {
+    // Regular store startup
+    persistStore(reduxStore, reduxConfig, () => {
+      signalStorageLoaded()
+      startup()
+    })
+  }
 }
 
 export default {updateReducers}

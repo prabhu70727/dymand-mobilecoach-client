@@ -11,7 +11,7 @@ import {inputMessageStyles} from './Styles/CommonStyles'
 import Log from '../../Utils/Log'
 const log = new Log('Components/CustomMessages')
 
-export default class MultipleChoice extends Component {
+export default class SelectManyComponent extends Component {
   constructor (props) {
     super(props)
     this.state = {
@@ -35,7 +35,8 @@ export default class MultipleChoice extends Component {
         let resultMessage = ''
         this.state.res.forEach((item, index) => {
           if (item !== '') {
-            resultMessage = resultMessage + '- ' + options[index].label + '\n---\n'
+            const label = options[index].label
+            resultMessage = resultMessage + '- ' + (label.startsWith('! ') ? label.substring(2) : label) + '\n---\n'
             result.push(options[index].value)
           } else {
             result.push('')
@@ -99,7 +100,7 @@ export default class MultipleChoice extends Component {
           // selectedIconStyle={} // style object for the icon when selected
           // unselectedIconStyle={} // style object for the icon when unselected
         />
-        <Button value={5} // {value}
+        <Button value={5} // {value} TODO: why value 5 ?
           containerStyle={styles.buttonContainer}
           disabledContainerStyle={[styles.disabled]}
           style={styles.button}

@@ -4,6 +4,7 @@ import {StartupActions} from '../Redux/StartupRedux'
 import moment from 'moment'
 
 import I18n from '../I18n/I18n'
+import { onboardingNav } from '../Containers/Onboarding/OnboardingNav'
 
 import Log from '../Utils/Log'
 const log = new Log('Redux/SettingsRedux')
@@ -22,7 +23,8 @@ export default Creators
 export const INITIAL_STATE = Immutable({
   language: I18n.currentLocale(), // take over the recognized, or default if not recognized, language locale as initial state
   coach: null,
-  tutorialCompleted: false
+  tutorialCompleted: false,
+  tutorialStep: null
 })
 
 /* ------------- Reducers ------------- */
@@ -58,10 +60,22 @@ export const completeTutorial = (state, {tutorialCompleted}) => {
   })
 }
 
+export const rememberTutorialStep = (state, {routeName}) => {
+  if (!state.tutorialCompleted && routeName !== onboardingNav) {
+    log.action('App', 'TutorialStep', routeName)
+    return state.merge({
+      tutorialStep: routeName
+    })
+  } else {
+    return state
+  }
+}
+
 /* ------------- Hookup Reducers To Actions ------------- */
 export const reducer = createReducer(INITIAL_STATE, {
   [StartupActions.STARTUP]: startup,
   [Types.CHANGE_LANGUAGE]: changeLanguage,
   [Types.CHOOSE_COACH]: chooseCoach,
-  [Types.COMPLETE_TUTORIAL]: completeTutorial
+  [Types.COMPLETE_TUTORIAL]: completeTutorial,
+  'Navigation/NAVIGATE': rememberTutorialStep
 })

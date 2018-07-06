@@ -9,10 +9,10 @@ import {
   Animated,
   Platform,
   ActivityIndicator,
-  View
+  View,
+  Text
 } from 'react-native'
 import * as Animatable from 'react-native-animatable'
-import Button from 'react-native-button'
 import {ifIphoneX} from 'react-native-iphone-x-helper'
 import Icon from 'react-native-vector-icons/Ionicons'
 import I18n from '../I18n/I18n'
@@ -30,31 +30,7 @@ function calcDistance (x1, y1, x2, y2) {
   return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2))
 }
 
-function getMaxTop (currentImgHeight) {
-  if (currentImgHeight === Metrics.screenHeight) return 0 - BOUNDS_PADDING
-  if (currentImgHeight > Metrics.screenHeight) return Metrics.screenHeight - currentImgHeight - BOUNDS_PADDING
-  else return 0
-}
-
-function getMinTop (currentImgHeight) {
-  if (currentImgHeight === Metrics.screenHeight) return 0 + BOUNDS_PADDING
-  if (currentImgHeight > Metrics.screenHeight) return 0 + BOUNDS_PADDING
-  else return Metrics.screenHeight - currentImgHeight
-}
-
-function getMaxLeft (currentImgWidt) {
-  if (currentImgWidt === Metrics.screenWidth) return 0 - BOUNDS_PADDING
-  if (currentImgWidt > Metrics.screenWidth) return Metrics.screenWidth - currentImgWidt - BOUNDS_PADDING
-  else return 0
-}
-
-function getMinLeft (currentImgWidt) {
-  if (currentImgWidt === Metrics.screenWidth) return 0 + BOUNDS_PADDING
-  if (currentImgWidt > Metrics.screenWidth) return 0 + BOUNDS_PADDING
-  else return Metrics.screenWidth - currentImgWidt
-}
-
-class Lightbox extends Component {
+export default class Lightbox extends Component {
   static defaultProps = {
     minZoom: 0.7,
     maxZoom: 4
@@ -68,25 +44,26 @@ class Lightbox extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      zoom: 1,
-      currentImgWidth: 0,
-      currentImgHeight: 0,
       initialZoom: 1,
       initialDistance: null,
       topAnimated: null,
       leftAnimated: null,
       zoomAnimated: new Animated.Value(1)
     }
+    this.imageWidth = 0
+    this.imageHeight = 0
+    this.state.zoomAnimated.addListener(({value}) => { this._value = value })
     // Pand responders for Container (swipe to close funtionality)
     this.containerPan = PanResponder.create({
       onMoveShouldSetPanResponder: (evt, gestureState) => {
+        if (!this.initialized) return false
         if (Platform.OS === 'android' && Math.abs(gestureState.dx) < 2) return false
         // Only care for gestures when not animating / zooming
-        if (this.isAnimating || this.isZooming || this.state.zoom !== 1) return false
+        if (this.isAnimating || this.isZooming || this.state.zoomAnimated._value !== 1) return false
         else {
           let touches = evt.nativeEvent.touches
           // for this responder, only care for 1-Finger-gestures and the lightbox isn't currently zoomed
-          if (touches.length > 1 && this.state.zoom === 1) return false
+          if (touches.length > 1 && this.state.zoomAnimated._value === 1) return false
         }
         return true
       },
@@ -96,7 +73,6 @@ class Lightbox extends Component {
         this.state.topAnimated.setValue(this.previousTop + dy)
         this.state.opacityAnimated.setValue(1 - (Math.abs(dy) / Metrics.screenHeight) * 2)
         this.state.zoomAnimated.setValue(1 - (Math.abs(dy) / Metrics.screenHeight) * 0.5)
-        this.state.leftAnimated.setValue(this.initLeft - this.getLeftOffset())
       },
       onPanResponderRelease: (evt, gestureState) => this.handlePanResponderEnd(evt, gestureState)
     })
@@ -104,6 +80,7 @@ class Lightbox extends Component {
     // Pand responders for Image-Container (Pinch to Zoom funtionality)
     this.imagePan = PanResponder.create({
       onMoveShouldSetPanResponder: (evt, gestureState) => {
+        if (!this.initialized) return false
         if (Platform.OS === 'android' && Math.abs(gestureState.dx) < 2) return false
         let touches = evt.nativeEvent.touches
         // for this responder, only care for 2-Finger-gestures (pinch)
@@ -125,7 +102,8 @@ class Lightbox extends Component {
         this.previousTop = this.state.topAnimated._value
         this.previousLeft = this.state.leftAnimated._value
         // Don't allow negative zooms, if zoom < 1, bounce-back
-        if (this.state.zoom < 1) this.rebounce()
+        if (this.state.zoomAnimated._value < 1) this.rebounce()
+        else this.bounceToBounds()
       }
     })
     // Variables to save current states
@@ -143,47 +121,42 @@ class Lightbox extends Component {
       this.initLeft = left
       this.previousTop = top
       this.previousLeft = left
+      this.imageWidth = width
+      this.imageHeight = height
       this.setState({
-        zoom: 1,
-        currentImgWidth: width,
-        currentImgHeight: height,
         initialZoom: 1,
         initialDistance: 0,
         topAnimated: new Animated.Value(top),
         leftAnimated: new Animated.Value(left),
         zoomAnimated: new Animated.Value(1),
         opacityAnimated: new Animated.Value(1)
-      }, () => {
-        // We need to update zoom as well, cause we pass it as a prop to responsive-image.
-        // We can't use animeted._value because this wouldn't nofitfy child of value-changes.
-        this.state.zoomAnimated.addListener(({value}) => {
-          this.setState({zoom: value})
-        })
       })
       this.initialized = true
     }
   }
 
-  // To keep the Image centered while zooming, the offsets caused by
-  // the zoom-factor need to be calculated
-  getTopOffset (newZoom) {
-    const {height} = this.img.getDimensions()
-    let initialZoom = this.state.initialZoom
-    let zoom = this.state.zoom
-    if (newZoom) zoom = newZoom
-    let initialOffset = (height * initialZoom - height) / 2
-    let newOffset = (height * zoom - height) / 2
-    return newOffset - initialOffset
+  currentImageWidth () {
+    return this.imageWidth * this.state.zoomAnimated._value
   }
 
-  getLeftOffset (newZoom) {
-    const {width} = this.img.getDimensions()
-    let initialZoom = this.state.initialZoom
-    let zoom = this.state.zoom
-    if (newZoom) zoom = newZoom
-    let initialOffset = (width * initialZoom - width) / 2
-    let newOffset = (width * zoom - width) / 2
-    return newOffset - initialOffset
+  currentImageHeight () {
+    return this.imageHeight * this.state.zoomAnimated._value
+  }
+
+  getMaxLeft () {
+    return (this.currentImageWidth() - this.imageWidth) / 2 + BOUNDS_PADDING
+  }
+
+  getMinLeft () {
+    return Metrics.screenWidth - this.currentImageWidth() + ((this.currentImageWidth() - this.imageWidth) / 2) - BOUNDS_PADDING
+  }
+
+  getMaxTop () {
+    return (this.currentImageHeight() - this.imageHeight) / 2 + BOUNDS_PADDING
+  }
+
+  getMinTop () {
+    return Metrics.screenHeight - this.currentImageHeight() + ((this.currentImageHeight() - this.imageHeight) / 2) - BOUNDS_PADDING
   }
 
   handlePanResponderEnd (evt, gestureState) {
@@ -201,7 +174,7 @@ class Lightbox extends Component {
   }
 
   handleTap () {
-    if (this.state.zoom !== 1) this.rebounce()
+    if (this.state.zoomAnimated._value !== 1) this.rebounce()
     else this.closeLightbox()
   }
 
@@ -219,10 +192,17 @@ class Lightbox extends Component {
   handleDrag (dx, dy) {
     let newTop = this.previousTop + dy
     let newLeft = this.previousLeft + dx
-    if (newTop < getMaxTop(this.state.currentImgHeight)) newTop = getMaxTop(this.state.currentImgHeight)
-    else if (newTop > getMinTop(this.state.currentImgHeight)) newTop = getMinTop(this.state.currentImgHeight)
-    if (newLeft < getMaxLeft(this.state.currentImgWidth)) newLeft = getMaxLeft(this.state.currentImgWidth)
-    else if (newLeft > getMinLeft(this.state.currentImgWidth)) newLeft = getMinLeft(this.state.currentImgWidth)
+
+    // Care that the Image stays in View..
+    if (newTop > this.getMaxTop()) newTop = this.getMaxTop()
+    if (newTop < this.getMinTop()) newTop = this.getMinTop()
+
+    if (newLeft > this.getMaxLeft()) newLeft = this.getMaxLeft()
+    if (newLeft < this.getMinLeft()) newLeft = this.getMinLeft()
+
+    // Only allow drag if the image overflows the related axis! (No drag if the axis is completely visible..)
+    if (Metrics.screenHeight > this.currentImageHeight()) newTop = this.previousTop
+    if (Metrics.screenWidth > this.currentImageWidth()) newLeft = this.previousLeft
 
     this.state.topAnimated.setValue(newTop)
     this.state.leftAnimated.setValue(newLeft)
@@ -235,7 +215,7 @@ class Lightbox extends Component {
       this.isZooming = true
       this.setState({
         initialDistance: distance,
-        initialZoom: this.state.zoom
+        initialZoom: this.state.zoomAnimated._value
       })
     // if this is not the initial pinch-event, set the zoom
     } else {
@@ -245,8 +225,46 @@ class Lightbox extends Component {
       if (zoom < this.props.minZoom) zoom = this.props.minZoom
       // Update Zoom
       this.state.zoomAnimated.setValue(zoom)
-      this.state.leftAnimated.setValue(this.previousLeft - this.getLeftOffset(zoom))
-      this.state.topAnimated.setValue(this.previousTop - this.getTopOffset(zoom))
+    }
+  }
+
+  // this function Animates the Image back into boundries
+  // This might be nessecary if the user zoomes out and previously moved the zoomed image
+  bounceToBounds () {
+    let top = this.previousTop
+    let left = this.previousLeft
+    // Check if the position is out of bounds
+    if (top > this.getMaxTop()) top = this.getMaxTop()
+    if (top < this.getMinTop()) top = this.getMinTop()
+    if (Metrics.screenHeight > this.currentImageHeight()) top = this.initTop
+
+    if (left > this.getMaxLeft()) left = this.getMaxLeft()
+    if (left < this.getMinLeft()) left = this.getMinLeft()
+    if (Metrics.screenWidth > this.currentImageWidth()) left = this.initLeft
+
+    // If one of the values exeeds the boundries, bounce back
+    if (top !== this.previousTop || left !== this.previousLeft) {
+      this.isAnimating = true
+      Animated.parallel([
+        Animated.timing(
+          this.state.topAnimated,
+          {
+            toValue: top,
+            duration: REBOUNCE_DURATION
+          }
+        ),
+        Animated.timing(
+          this.state.leftAnimated,
+          {
+            toValue: left,
+            duration: REBOUNCE_DURATION
+          }
+        )
+      ]).start(() => {
+        this.isAnimating = false
+        this.previousTop = this.state.topAnimated._value
+        this.previousLeft = this.state.leftAnimated._value
+      })
     }
   }
 
@@ -299,30 +317,41 @@ class Lightbox extends Component {
       <Animatable.View useNativeDriver style={[styles.mask, {opacity: this.state.opacityAnimated}]} ref={mask => { this.mask = mask }}>
         {!this.initialized ? <ActivityIndicator size='large' color='#fff' /> : null}
         <View {...this.containerPan.panHandlers} style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}>
-          <Animatable.View ref={container => { this.imgContainer = container }}
+          <Animatable.View useNativeDriver ref={container => { this.imgContainer = container }}
             {...this.imagePan.panHandlers}
-            style={{position: 'absolute', top: this.state.topAnimated, left: this.state.leftAnimated, width: this.state.currentImgWidth, height: this.state.currentImgHeight}}
+            style={{
+              justifyContent: 'center',
+              position: 'absolute',
+              transform: [
+                {translateY: this.state.topAnimated ? this.state.topAnimated : 0},
+                {translateX: this.state.leftAnimated ? this.state.leftAnimated : 0},
+                {scaleX: this.state.zoomAnimated},
+                {scaleY: this.state.zoomAnimated}
+              ]
+            }} // top: this.state.topAnimated, left: this.state.leftAnimated
             >
             <TouchableOpacity activeOpacity={1} onPress={() => this.handleTap()}>
               <ResponsiveImage
+                cached
+                // the Lightbox has it's own activity-Indicator, so we dont want
+                // the indicator from responsive-image to be displayed as well
+                activityIndicatorProps={{color: 'transparent'}}
                 ref={img => { this.img = img }}
-                source={source} width={INIT_IMAGE_WIDTH}
+                source={source}
+                width={INIT_IMAGE_WIDTH}
                 onDimensionsChanged={(width, height) => {
-                  this.setState({currentImgWidth: width, currentImgHeight: height})
                   if (!this.initialized) this.initialize(width, height)
                 }}
-                scale={this.state.zoom}
               />
             </TouchableOpacity>
           </Animatable.View>
         </View>
-        <Button
-          containerStyle={styles.closeButtonContainer}
-          style={styles.closeButton}
+        <TouchableOpacity
+          style={styles.closeButtonContainer}
           onPress={() => this.closeLightbox()}>
-          {I18n.t('Common.close')}
+          <Text style={styles.closeButton}>{I18n.t('Common.close')}</Text>
           <Icon name='md-close' type='ionicon' style={{paddingLeft: 10, fontSize: 30, color: '#fff'}} />
-        </Button>
+        </TouchableOpacity>
       </Animatable.View>
     )
   }
@@ -345,11 +374,17 @@ const styles = StyleSheet.create({
     right: 20,
     ...ifIphoneX({
       top: 55
-    })
+    }),
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 5,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255,255,255,0.1)'
   },
   closeButton: {
+    fontSize: 20,
     color: '#fff'
   }
 })
-
-export { Lightbox }

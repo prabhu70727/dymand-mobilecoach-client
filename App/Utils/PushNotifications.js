@@ -33,7 +33,7 @@ export default class PushNotifications {
     return instance
   }
 
-  init (resetStore, androidSenderId) {
+  init (resetStore, androidSenderId, requestPermissions) {
     log.debug('Init push notifications...')
     if (!initialized) {
       // Reset store if required
@@ -181,11 +181,9 @@ export default class PushNotifications {
         requestPermissions: false
       })
 
-      // Request permissions (if not already granted)
-      try {
-        PushNotificationsHandler.requestPermissions()
-      } catch (error) {
-        log.warn('Error at requesting push permissions:', error)
+      // automatically request permissions (if defined this way)
+      if (requestPermissions) {
+        this.requestPermissions()
       }
 
       // Care about app state changes
@@ -234,6 +232,14 @@ export default class PushNotifications {
   getPlatform () {
     log.debug('Get platform', platform)
     return platform
+  }
+
+  requestPermissions () {
+    try {
+      PushNotificationsHandler.requestPermissions()
+    } catch (error) {
+      log.warn('Error at requesting push permissions:', error)
+    }
   }
 
   rememberToken (tokenToRemember, platformToRemember) {

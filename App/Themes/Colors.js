@@ -27,7 +27,8 @@ const colors = {
   },
   onboarding: {
     background: Brand.colors.primary,
-    text: Brand.colors.text2
+    text: Brand.colors.text2,
+    loadingIndicator: Brand.colors.text2
   },
   navigationBar: {
     background: Brand.colors.primary,
@@ -54,7 +55,8 @@ const colors = {
     ticks: {
       unread: Brand.colors.text2,
       read: Brand.colors.buttonBackground
-    }
+    },
+    activityIndicator: Brand.colors.primary
   },
   buttons: {
     common: {
@@ -67,10 +69,12 @@ const colors = {
       ...button
     },
     likertSlider: {
-      ...button,
-      thumb: button.text, // slider handle
-      minTint: Brand.colors.primary, // slider background left
-      maxTint: button.disabled // slider background right
+      button,
+      background: Brand.colors.background2,
+      text: Brand.colors.text2,
+      thumb: Brand.colors.text2, // slider handle
+      minTint: button.background, // slider background left
+      maxTint: button.background // slider background right
     },
     openComponent: {
       ...button
@@ -84,10 +88,6 @@ const colors = {
         text: Brand.colors.textMain,
         border: Brand.colors.background1
       }
-    },
-    freeNumbers: {
-      ...button,
-      selection: Brand.colors.text2
     },
     freeText: {
       ...button,
@@ -108,16 +108,26 @@ const colors = {
     headerBackground: Brand.colors.background1,
     headerText: Brand.colors.text1,
     background: Brand.colors.backgroundMain,
-    text: Brand.colors.textMain
+    text: Brand.colors.textMain,
+    loadingIndicator: Brand.colors.textMain
   },
   toast: {
     text: Brand.colors.primary,
     background: Brand.colors.primaryText
   },
+  video: {
+    thumb: button.text, // slider handle
+    minTint: Brand.colors.buttonBackground, // slider background left
+    maxTint: Brand.colors.grey1 // slider background right
+  },
   connectionIndicator: {
     neutralState: '#FFFFFF',
     intermediateState: '#fda428',
     successState: '#33A02C'
+  },
+  badge: {
+    background: '#E74C3C',
+    text: Brand.colors.primaryText
   },
   modules: {
     tour: {

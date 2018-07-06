@@ -5,10 +5,13 @@ import AddMealContainer from './AddMealModule/AddMealContainer'
 import FoodDiary from './FoodDiary/FoodDiary'
 import WebRichContent from '../Components/WebRichContent'
 import WebViewContent from '../Components/WebViewContent'
-import { Lightbox } from '../Components/Lightbox'
+import Lightbox from '../Components/Lightbox'
+import FullscreenVideo from '../Components/Video/FullscreenVideo'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import * as Animatable from 'react-native-animatable'
+
+import FeedbackForm from './Settings/FeedbackForm'
 
 import ServerMessageActions from '../Redux/MessageRedux'
 import GUIActions from '../Redux/GUIRedux'
@@ -108,6 +111,23 @@ class ModalContent extends Component {
       case 'image-lightbox':
         return (<Lightbox
           source={this.props.content.source}
+          onClose={this.props.onClose}
+              />)
+      case 'fullscreen-video':
+        return (<FullscreenVideo
+          videoPlayer={this.props.content.videoPlayer}
+          source={this.props.content.source}
+          initialPosition={this.props.content.initialPosition}
+          paused={this.props.content.paused}
+          closeFullscreenCallback={this.props.content.closeFullscreenCallback}
+          onClose={this.props.onClose}
+              />)
+      case 'feedback-form':
+        return (<FeedbackForm
+          onSubmit={(name, email, feedback) => {
+            this.props.content.onSubmit(name, email, feedback)
+            this.props.onClose()
+          }}
           onClose={this.props.onClose}
               />)
       default: return null

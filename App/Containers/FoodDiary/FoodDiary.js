@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {View, StyleSheet, Dimensions} from 'react-native'
+import {View, StyleSheet} from 'react-native'
 import I18n from '../../I18n/I18n'
 import {connect} from 'react-redux'
 import { TabViewAnimated, TabBar, SceneMap } from 'react-native-tab-view'
@@ -11,10 +11,14 @@ import PyramidView from './PyramidView'
 import PMNavigationBar from '../../Components/Navbar'
 import StoryProgressActions from '../../Redux/StoryProgressRedux'
 
+/*
+ * Using initialLayout shoud speed up the tab view,
+ * but apparantly it is causing display error to the underline-indicator when entering on second screen!
 const initialLayout = {
   height: 0,
   width: Dimensions.get('window').width
 }
+*/
 
 class FoodDiary extends Component {
   constructor (props) {
@@ -45,7 +49,7 @@ class FoodDiary extends Component {
   }
 
   _handleIndexChange = (index) => {
-    if (index === 1) this.props.visitScreen('Pyramid')
+    if (index === 1) this.props.visitScreen('pyramid')
     this.setState({ index })
   }
 
@@ -66,7 +70,7 @@ class FoodDiary extends Component {
         renderScene={this._renderScene}
         renderHeader={this._renderHeader}
         onIndexChange={this._handleIndexChange}
-        initialLayout={initialLayout}
+        // initialLayout={initialLayout}
       />
     )
   }

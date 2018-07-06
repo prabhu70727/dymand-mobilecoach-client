@@ -1,18 +1,19 @@
 import React, { Component } from 'react'
-import {
-  Text,
-  View,
-  Image,
-  StyleSheet
-} from 'react-native'
 import {ifIphoneX} from 'react-native-iphone-x-helper'
+import { Text, View, Image, StyleSheet, Platform } from 'react-native'
+import { connect } from 'react-redux'
 
 import NextButton from '../../Components/NextButton'
 import { Colors, Images } from '../../Themes/'
 import I18n from '../../I18n/I18n'
+import MessageActions from '../../Redux/MessageRedux'
 
-class ScreenOne extends Component {
+// Adjust to the appropriate next screen
+const nextScreen = 'ScreenLanguageSelection'
+
+class ScreenStartWithLogo extends Component {
   render () {
+    const {sendPlatformIntention} = this.props
     const { navigate } = this.props.navigation
     return (
       <View style={styles.container}>
@@ -28,7 +29,8 @@ class ScreenOne extends Component {
           <Text style={styles.title}>{I18n.t('Onboarding.title')}</Text>
           <Text style={styles.subtitle}>{I18n.t('Onboarding.subtitle')}</Text>
           <NextButton text={I18n.t('Onboarding.next')} onPress={() => {
-            navigate('ScreenTwo')
+            sendPlatformIntention(Platform.OS)
+            navigate(nextScreen)
           }} />
         </View>
       </View>
@@ -36,7 +38,11 @@ class ScreenOne extends Component {
   }
 }
 
-export default ScreenOne
+const mapStateToDispatch = dispatch => ({
+  sendPlatformIntention: (platform) => dispatch(MessageActions.sendIntention(null, 'platform', platform))
+})
+
+export default connect(null, mapStateToDispatch)(ScreenStartWithLogo)
 
 const styles = StyleSheet.create({
   container: {flex: 1, alignItems: 'center', flexDirection: 'column', backgroundColor: Colors.onboarding.background},

@@ -1,19 +1,17 @@
 import React, { Component } from 'react'
-import {
-  StyleSheet,
-  Text,
-  View,
-  Alert
-} from 'react-native'
+import { StyleSheet, Text, View, Alert } from 'react-native'
 import {ifIphoneX} from 'react-native-iphone-x-helper'
-
 import { connect } from 'react-redux'
+
 import NextButton from '../../Components/NextButton'
 import I18n from '../../I18n/I18n'
 import SettingsActions from '../../Redux/SettingsRedux'
 import { Colors } from '../../Themes/'
 
-class ScreenTwo extends Component {
+// Adjust to the appropriate next screen
+const nextScreen = 'ScreenCoachSelection' // 'ScreenScreeningSurvey'
+
+class ScreenLanguageSelection extends Component {
   render () {
     const {changeLanguage} = this.props
     const {navigate} = this.props.navigation
@@ -28,7 +26,7 @@ class ScreenTwo extends Component {
           }} />
           <NextButton text='Deutsch' onPress={() => {
             changeLanguage('de-CH')
-            navigate('ScreenThree')
+            navigate(nextScreen)
           }} />
           <NextButton text='Francais' onPress={() => {
             Alert.alert(
@@ -69,7 +67,7 @@ const mapStateToDispatch = dispatch => ({
   changeLanguage: (newLang) => dispatch(SettingsActions.changeLanguage(newLang))
 })
 
-export default connect(null, mapStateToDispatch)(ScreenTwo)
+export default connect(null, mapStateToDispatch)(ScreenLanguageSelection)
 
 const Styles = StyleSheet.create({
   container: {flex: 1, justifyContent: 'center', backgroundColor: Colors.onboarding.background, ...ifIphoneX({ paddingTop: 40 })},

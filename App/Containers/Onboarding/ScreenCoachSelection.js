@@ -1,20 +1,18 @@
 import React, { Component } from 'react'
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TouchableOpacity
-} from 'react-native'
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
 import {ifIphoneX} from 'react-native-iphone-x-helper'
-
 import { connect } from 'react-redux'
+
 import I18n from '../../I18n/I18n'
 import SettingsActions from '../../Redux/SettingsRedux'
 import { Colors, Metrics, Images } from '../../Themes/'
 import MessageActions from '../../Redux/MessageRedux'
 
-class ScreenThree extends Component {
+// Adjust to the appropriate next screen
+// const nextScreen = 'ScreenWelcomeByCoach'
+const nextScreen = 'ScreenWelcomeByCoach'
+
+class ScreenCoachSelection extends Component {
   render () {
     const {chooseCoach, sendCoachIntention} = this.props
     const coaches = Images.coaches
@@ -23,16 +21,15 @@ class ScreenThree extends Component {
     return (
       <View style={Styles.container}>
         <View style={Styles.containerMargin} />
-        <View style={{marginHorizontal: 40, flex: 0.35}}>
+        <View style={{marginHorizontal: 30, flex: 0.5}}>
           <View style={Styles.imageContainer}>
             {coaches.map((coach, index) => (
               <TouchableOpacity
-                style={Styles.coachContainer}
                 key={index}
                 onPress={() => {
                   chooseCoach(index)
                   sendCoachIntention(I18n.t('Coaches.' + index))
-                  navigate('ScreenFour')
+                  navigate(nextScreen)
                 }}>
                 <View style={Styles.circle}>
                   <Image style={Styles.coachImage} source={coach} />
@@ -55,13 +52,12 @@ const mapStateToDispatch = dispatch => ({
   sendCoachIntention: (coachName) => dispatch(MessageActions.sendIntention(null, 'coach', coachName))
 })
 
-export default connect(null, mapStateToDispatch)(ScreenThree)
+export default connect(null, mapStateToDispatch)(ScreenCoachSelection)
 
 const Styles = StyleSheet.create({
-  coachContainer: {height: 170},
   container: {flex: 1, justifyContent: 'center', backgroundColor: Colors.onboarding.background, ...ifIphoneX({ paddingTop: 40 })},
   containerMargin: {flex: 0.3},
-  imageContainer: {flex: 0.7, flexDirection: 'row', justifyContent: 'space-between'},
+  imageContainer: {flex: 0.7, flexDirection: 'row', justifyContent: 'space-around'},
   image: {flex: 1, alignSelf: 'stretch', resizeMode: 'contain'},
   textContainer: {flex: 0.35, justifyContent: 'flex-start'},
   subtitle: {

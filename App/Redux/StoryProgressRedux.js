@@ -1,5 +1,7 @@
 import { createReducer, createActions } from 'reduxsauce'
 import Immutable from 'seamless-immutable'
+
+import Common from '../Utils/Common'
 // Import message actions
 import { MessageActions } from './MessageRedux'
 import R from 'ramda'
@@ -34,9 +36,9 @@ export const INITIAL_STATE = Immutable({
 /* ------------- Reducers ------------- */
 
 export const handleProgressCommand = (state, {command, content}) => {
-  const commandWithValue = command.split(' ')
-  const onlyCommand = commandWithValue[0]
-  switch (onlyCommand) {
+  const parsedCommand = Common.parseCommand(command)
+
+  switch (parsedCommand.command) {
     case 'complete-tutorial':
       return {
         ...state,

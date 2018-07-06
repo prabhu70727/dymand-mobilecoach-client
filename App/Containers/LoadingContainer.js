@@ -54,16 +54,17 @@ class LoadingContainer extends Component {
     const navigateAction = NavigationActions.navigate({
       routeName: 'Chat',
       params: {}
-      // action: NavigationActions.navigate({ routeName: 'SubProfileRoute'})
     })
+
     this.props.navigation.dispatch(navigateAction)
   }
 
   navigateToOnboarding () {
     const navigateAction = NavigationActions.navigate({
       routeName: 'OnboardingNav',
-      params: {}
-      // action: NavigationActions.navigate({ routeName: 'SubProfileRoute'})
+      params: {},
+      // TODO: Make this configurable in App configuration
+      action: null // this.props.tutorialStep != null ? NavigationActions.navigate({ routeName: this.props.tutorialStep }) : null
     })
 
     this.props.navigation.dispatch(navigateAction)
@@ -96,6 +97,7 @@ const styles = {
 
 const mapStateToProps = (state) => {
   return {
+    tutorialStep: state.settings.tutorialStep,
     tutorialCompleted: state.settings.tutorialCompleted,
     hydrationCompleted: state.hydrationCompleted
   }

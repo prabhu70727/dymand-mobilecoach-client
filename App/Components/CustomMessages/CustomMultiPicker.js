@@ -29,10 +29,28 @@ export default class CustomMultiPicker extends Component {
 
   _onSelect = (item, options) => {
     let selectedItems = this.state.selected
-    // check if already included
-    if (!selectedItems.includes(item)) selectedItems.push(item)
-    // remove if already included
-    else selectedItems = selectedItems.filter((currentItem) => currentItem !== item)
+    if (!selectedItems.includes(item)) {
+      // add if not included
+      selectedItems.push(item)
+    } else {
+      // remove if already included
+      selectedItems = selectedItems.filter((currentItem) => currentItem !== item)
+    }
+
+    // Adjust based on "non"-items
+    if (options[item].label.startsWith('! ')) {
+      options.forEach((option, index) => {
+        if (selectedItems.includes(index) && !option.label.startsWith('! ')) {
+          selectedItems = selectedItems.filter((currentItem) => currentItem !== index)
+        }
+      })
+    } else {
+      options.forEach((option, index) => {
+        if (selectedItems.includes(index) && option.label.startsWith('! ')) {
+          selectedItems = selectedItems.filter((currentItem) => currentItem !== index)
+        }
+      })
+    }
 
     this.setState(
       {selected: selectedItems}
@@ -44,34 +62,8 @@ export default class CustomMultiPicker extends Component {
       if (selectedItems.includes(index)) result.push(option)
       else result.push('')
     })
+
     this.props.callback(result)
-    // const selected = this.state.selected
-    // if (this.props.multiple) {
-    //   if (selected.indexOf(item) === -1) {
-    //     selected.push(item)
-    //     this.setState({
-    //       selected: selected
-    //     })
-    //   } else {
-    //     selected = selected.filter(i => i !== item)
-    //     this.setState({
-    //       selected: selected
-    //     })
-    //   }
-    // } else {
-    //   if (selected.indexOf(item) === -1) {
-    //     selected = [item]
-    //     this.setState({
-    //       selected: selected
-    //     })
-    //   } else {
-    //     selected = []
-    //     this.setState({
-    //       selected: selected
-    //     })
-    //   }
-    // }
-    // this.props.callback(selected)
   }
 
   _isSelected = (itemKey) => {
@@ -121,7 +113,7 @@ export default class CustomMultiPicker extends Component {
                 this._onSelect(itemKey, options)
               }}
               >
-              <View style={{flexShrink: 1}}><Text style={{color: this.props.labelColor}}>{option.label}</Text></View>
+              <View style={{flexShrink: 1}}><Text style={{color: this.props.labelColor}}>{option.label.startsWith('! ') ? option.label.substring(2) : option.label}</Text></View>
               {
                 this._isSelected(itemKey)
                 ? <Icon name={this.props.selectedIconName}

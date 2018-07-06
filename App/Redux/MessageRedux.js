@@ -21,6 +21,7 @@ const { Types, Creators } = createActions({
   commandToExecute: ['command', 'content'],
   commandExecuted: ['messageId'],
   messageReadByGiftedChat: ['messageId'],
+  messageFakeTimestampForGiftedChat: ['messageId', 'fakeTimestamp'],
   messageUnStickedByGiftedChat: ['messageId'],
   disableMessage: ['messageId'], // saga
   messageDisabledByGiftedChat: ['messageId']
@@ -174,8 +175,20 @@ export const commandExecuted = (state, { messageId }) => {
 }
 
 // Remember that a message has been read in the GUI
-export const messageReadByGiftedChat = (state, { messageId, fakeTimestamp = null }) => {
+export const messageReadByGiftedChat = (state, { messageId }) => {
   const mergedMessageToStore = R.merge(state[messageId], {'client-read': true})
+
+  // Care for client version
+  mergedMessageToStore['client-version'] = mergedMessageToStore['client-version'] + 1
+
+  return { ...state,
+    [messageId]: mergedMessageToStore
+  }
+}
+
+// Remember fake timestamp used to display message in the GUI
+export const messageFakeTimestampForGiftedChat = (state, { messageId, fakeTimestamp = null }) => {
+  const mergedMessageToStore = R.clone(state[messageId])
 
   // Care for client version
   mergedMessageToStore['client-version'] = mergedMessageToStore['client-version'] + 1
@@ -221,6 +234,7 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.COMMAND_TO_EXECUTE]: null,
   [Types.COMMAND_EXECUTED]: commandExecuted,
   [Types.MESSAGE_READ_BY_GIFTED_CHAT]: messageReadByGiftedChat,
+  [Types.MESSAGE_FAKE_TIMESTAMP_FOR_GIFTED_CHAT]: messageFakeTimestampForGiftedChat,
   [Types.MESSAGE_UN_STICKED_BY_GIFTED_CHAT]: messageUnStickedByGiftedChat,
   [Types.MESSAGE_DISABLED_BY_GIFTED_CHAT]: messageDisabledByGiftedChat
 })

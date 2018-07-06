@@ -8,7 +8,9 @@ const log = new Log('Redux/ServerSyncRedux')
 
 const { Types, Creators } = createActions({
   initialize: [], // saga
+  handleCommands: ['command'], // saga
   rememberRegistration: ['deepstreamUser', 'deepstreamSecret'],
+  rememberPushTokenRequested: [],
   rememberPushTokenShared: [],
   rememberLatestTimestamp: ['timestamp'],
   rememberPushToken: ['platform', 'token'],
@@ -32,6 +34,7 @@ export const SETTINGS_INITIAL_STATE = Immutable({
   restToken: null,
   pushPlatform: null,
   pushToken: null,
+  pushRequested: false,
   pushShared: false
 })
 
@@ -59,6 +62,12 @@ export const rememberLatestTimestamp = (state, action) => {
   } else {
     return state
   }
+}
+
+export const rememberPushTokenRequested = (state) => {
+  log.debug('Remember push token requested')
+
+  return state.merge({ pushRequested: true })
 }
 
 export const rememberPushTokenShared = (state) => {
@@ -93,6 +102,7 @@ export const rememberPushToken = (state, action) => {
 // Settings
 export const settingsReducer = createReducer(SETTINGS_INITIAL_STATE, {
   [Types.REMEMBER_REGISTRATION]: rememberRegistration,
+  [Types.REMEMBER_PUSH_TOKEN_REQUESTED]: rememberPushTokenRequested,
   [Types.REMEMBER_PUSH_TOKEN_SHARED]: rememberPushTokenShared,
   [Types.REMEMBER_LATEST_TIMESTAMP]: rememberLatestTimestamp,
   [Types.REMEMBER_PUSH_TOKEN]: rememberPushToken

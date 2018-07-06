@@ -1,9 +1,11 @@
 import { NetInfo, Platform } from 'react-native'
 import { call, select, put, take } from 'redux-saga/effects'
-import { delay, channel, buffers } from 'redux-saga'
+import { delay } from 'redux-saga'
 import createDeepstream from 'deepstream.io-client-js'
 
+import Common from '../Utils/Common'
 import AppConfig from '../Config/AppConfig'
+import { StartupActions } from '../Redux/StartupRedux'
 import { ServerSyncActions, ConnectionStates } from '../Redux/ServerSyncRedux'
 import { MessageStates, MessageActions } from '../Redux/MessageRedux'
 import { MessageTypes } from '../Sagas/MessageSagas'
@@ -21,6 +23,8 @@ const fakeDeviceAlwaysOnlineForOfflineDev = AppConfig.config.dev.fakeDeviceAlway
 
 const createSyncClient = createDeepstream
 
+let initialized = false
+
 let syncClient = null
 
 let online = false
@@ -31,18 +35,31 @@ let inSync = false
 
 let serverSyncUser = null
 
-const connectionStateChannel = channel(buffers.expanding())
-const incomingMessageChannel = channel(buffers.expanding())
-const outgoingMessageChannel = channel(buffers.expanding())
+let connectionStateChannel = null
+let incomingMessageChannel = null
+let outgoingMessageChannel = null
+
+/* --- Set channels from outside --- */
+export function setChannels (newConnectionStateChannel, newIncomingMessageChannel, newOutgoingMessageChannel) {
+  log.debug('Setting serverSync channels.')
+  connectionStateChannel = newConnectionStateChannel
+  incomingMessageChannel = newIncomingMessageChannel
+  outgoingMessageChannel = newOutgoingMessageChannel
+}
 
 /* --- Register user on server --- */
 export function * initializeServerSync (action) {
-  const { hydrationCompleted } = action
-  if (!hydrationCompleted) {
+  const preInitSettings = yield select(selectServerSyncSettings)
+  if (action.type === StartupActions.STARTUP && !AppConfig.config.startup.automaticallyConnectOnFirstStartup && (preInitSettings.deepstreamUser == null || preInitSettings.deepstreamSecret == null)) {
+    log.info('Server sync is not starting up automatically.')
     return
   }
 
+  if (initialized) {
+    return
+  }
   log.info('Initializing server sync...')
+  initialized = true
 
   log.debug('Care for prepared messages...')
   const allMessages = yield select(selectMessages)
@@ -51,8 +68,23 @@ export function * initializeServerSync (action) {
 
   log.debug('Care for connection status of device...')
 
-  NetInfo.getConnectionInfo().then((connectionInfo) => { handleDeviceConnectivity(connectionInfo) })
-  NetInfo.addEventListener(
+  // START of workaround for problems with network connection state on some android devices
+  const onInitialNetConnection = isConnected => {
+    NetInfo.isConnected.removeEventListener(
+          onInitialNetConnection
+      )
+  }
+
+  NetInfo.isConnected.addEventListener(
+      'connectionChange',
+      onInitialNetConnection
+  )
+  // END of workaround
+
+  yield NetInfo.isConnected.fetch().then(isConnected => {
+    handleDeviceConnectivity(isConnected)
+  })
+  NetInfo.isConnected.addEventListener(
     'connectionChange',
     handleDeviceConnectivity
   )
@@ -71,7 +103,26 @@ export function * initializeServerSync (action) {
     log.debug('User not registered, so it will be done implicitely on connect')
   }
 
+  // Check success of manual push notification request
+  yield call(checkPushNotificationsRequested)
+
   connectionStateChannel.put({type: ServerSyncActions.CONNECTION_STATE_CHANGE, connectionState: ConnectionStates.INITIALIZED})
+}
+
+/* --- Handle special commands --- */
+export function * handleCommands (action) {
+  const {command} = action
+
+  const parsedCommand = Common.parseCommand(command)
+
+  switch (parsedCommand.command) {
+    // Manually request push permissions
+    case 'request-push-permissions':
+      log.debug('Manually requesting push permissions...')
+      yield put({type: ServerSyncActions.REMEMBER_PUSH_TOKEN_REQUESTED})
+      PushNotifications.getInstance().requestPermissions()
+      break
+  }
 }
 
 /* --- Handle messages created on the client --- */
@@ -237,12 +288,6 @@ function * reactBasedOnConnectionState (action) {
   switch (connectionState) {
     case ConnectionStates.INITIALIZED:
       log.info('Initialized.')
-
-      NetInfo.getConnectionInfo().then((connectionInfo) => { handleDeviceConnectivity(connectionInfo) })
-      NetInfo.removeEventListener(
-        'connectionChange',
-        handleDeviceConnectivity
-      )
 
       let onlineStatus = online
       while (!onlineStatus) {
@@ -501,25 +546,36 @@ async function handleError (error, event, topic) {
 }
 
 /* --- Callback function for device status: Informs about client connection state --- */
-function handleDeviceConnectivity (connectionInfo) {
-  log.debug('Device connectivity changed:', connectionInfo)
+function handleDeviceConnectivity (isConnected) {
+  log.debug('Device connectivity changed. Connected:', isConnected)
 
   if (fakeDeviceAlwaysOnlineForOfflineDev) {
     online = true
     return
   }
 
-  if (connectionInfo.type === 'none' && online) {
-    online = false
-  } else if (connectionInfo.type !== 'none' && !online) {
-    online = true
+  if (online !== isConnected) {
+    online = isConnected
   }
 }
 
 /* --- Promises --- */
 const rpcPromise = (name, data, requiresSync = false) => new Promise((resolve, reject) => {
   let firstTry = true
+  let callRunning = false
+  let cleanupCallPerformed = false
   const id = Math.floor((Math.random() * 999999) + 1)
+
+  var cleanupCall = function () {
+    if (callRunning) {
+      callRunning = false
+      cleanupCallPerformed = true
+      log.debug('rpcPromise TRACE ' + id + ' - X1 - method:', name, 'cleanup call necessary, reject will be performed.')
+      reject(new Error('RPC call died. (Special case solution)'))
+    } else {
+      log.debug('rpcPromise TRACE ' + id + ' - X2 - method:', name, 'cleanup call not necessary.')
+    }
+  }
 
   log.debug('rpcPromise TRACE ' + id + ' - S1 (START) - method:', name)
   try {
@@ -528,20 +584,29 @@ const rpcPromise = (name, data, requiresSync = false) => new Promise((resolve, r
       reject(new Error('Sync client not in sync!'))
     } else {
       log.debug('rpcPromise TRACE ' + id + ' - S2 - method:', name)
+      callRunning = true
+      const timeout = setTimeout(cleanupCall, 15000)
       syncClient.rpc.make(name, data, (error, result) => {
-        log.debug('rpcPromise TRACE ' + id + ' - S6 - method:', name, 'is result null or undefined:', (typeof result === 'undefined' || result === null))
-        if (error === null) {
-          log.debug('rpcPromise TRACE ' + id + ' - S7 (DONE) - method:', name)
-          resolve(result)
-        } else {
-          log.debug('rpcPromise TRACE ' + id + ' - E2 - method:', name, 'error:', error)
-          if (error === 'RESPONSE_TIMEOUT' && firstTry) {
-            firstTry = false
-            log.debug('rpcPromise TRACE ' + id + ' - E2 (EXPECTING RETRY S7 or E2) - method:', name)
-            return
+        callRunning = false
+        clearTimeout(timeout)
+
+        if (!cleanupCallPerformed) {
+          log.debug('rpcPromise TRACE ' + id + ' - S6 - method:', name, 'is result null or undefined:', (typeof result === 'undefined' || result === null))
+          if (error === null) {
+            log.debug('rpcPromise TRACE ' + id + ' - S7 (DONE) - method:', name)
+            resolve(result)
+          } else {
+            log.debug('rpcPromise TRACE ' + id + ' - E2 - method:', name, 'error:', error)
+            if (error === 'RESPONSE_TIMEOUT' && firstTry) {
+              firstTry = false
+              log.debug('rpcPromise TRACE ' + id + ' - E2 (EXPECTING RETRY S7 or E2) - method:', name)
+              return
+            }
+            log.debug('rpcPromise TRACE ' + id + ' - E2 (FAIL) - method:', name)
+            reject(error)
           }
-          log.debug('rpcPromise TRACE ' + id + ' - E2 (FAIL) - method:', name)
-          reject(error)
+        } else {
+          log.debug('rpcPromise TRACE ' + id + ' - E4 - method:', name, 'received RPC response after cleanup has been performed. -> Ignore RPC response.')
         }
       })
       log.debug('rpcPromise TRACE ' + id + ' - S3 - method:', name)
@@ -562,6 +627,16 @@ function rememberPushToken (token, platform) {
     log.debug('Task to remember push token added to incoming message channel')
   } catch (error) {
     log.error('Error at remembering push token:', error)
+  }
+}
+
+function * checkPushNotificationsRequested () {
+  let settings = yield select(selectServerSyncSettings)
+
+  if (settings.pushToken === null && settings.pushRequested === true) {
+    // Push token not available but has already been requested (at former startup)
+    log.debug('Trying to request push permissions again...')
+    PushNotifications.getInstance().requestPermissions()
   }
 }
 

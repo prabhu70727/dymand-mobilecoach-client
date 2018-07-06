@@ -101,12 +101,6 @@ export default class SelectOneButton extends Component {
     }
   }
 
-  async callFunctionAfterDelay (func, delay) {
-    setTimeout(() => {
-      func()
-    }, delay)
-  }
-
   componentDidMount () {
     // notify redux that animationw as shown after first render
     const {currentMessage} = this.props

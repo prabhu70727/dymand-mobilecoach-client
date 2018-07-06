@@ -32,7 +32,7 @@ class Item extends Component {
             cardElevation={2}
             cardMaxElevation={2}
             cornerRadius={5}
-            style={{backgroundColor: Colors.buttons.common.backround}}
+            style={{backgroundColor: Colors.buttons.common.background}}
             >
             <View style={{
               height: CARD_HEIGHT,
@@ -82,6 +82,16 @@ class Backpack extends Component {
       const info = backpackInformation[key]
       infoArray.push(info)
     })
+    // Sort Array from timestamp
+    infoArray.sort((a, b) => {
+      if (a.time > b.time) {
+        return 1
+      }
+      if (a.time < b.time) {
+        return -1
+      }
+      return 0
+    })
     return (
       infoArray.map((info, index, array) => {
         if (index % 2 === 0) {
@@ -113,7 +123,8 @@ export default connect(mapStateToProps)(Backpack)
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    backgroundColor: Colors.main.appBackground
   },
   content: {
     flex: 1

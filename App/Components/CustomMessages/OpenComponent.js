@@ -10,7 +10,9 @@ export default class OpenComponent extends Component {
   static propTypes = {
     currentMessage: PropTypes.object,
     onPress: PropTypes.func,
-    setAnimationShown: PropTypes.func
+    setAnimationShown: PropTypes.func,
+    icon: PropTypes.string,
+    iconType: PropTypes.string
   }
 
   constructor (props) {
@@ -19,18 +21,24 @@ export default class OpenComponent extends Component {
   }
 
   render () {
-    const {currentMessage, onPress} = this.props
-
+    const {currentMessage, onPress, icon, iconType} = this.props
     return (
-      <Animatable.View useNativeDriver animation={this.shouldAnimate ? this.props.fadeInAnimation : null} duration={this.props.duration} style={styles.container} onAnimationEnd={() => { this.shouldAnimate = false }} >
+      <Animatable.View
+        useNativeDriver
+        animation={this.shouldAnimate ? this.props.fadeInAnimation : null}
+        duration={this.props.duration}
+        style={[styles.container, currentMessage.previousMessage.type === 'open-component' ? {marginTop: 0} : null]}
+        onAnimationEnd={() => { this.shouldAnimate = false }}
+      >
         <Button
           containerStyle={styles.buttonContainer}
           disabledContainerStyle={[styles.buttonDisabled]}
           disabled={currentMessage.custom.disabled}
-          style={styles.button}
+          style={[styles.button, icon ? {paddingLeft: 30} : null]}
           onPress={() => {
             onPress(currentMessage.custom.component)
           }}>
+          {icon ? <Icon name={icon} type={iconType} size={20} color={Colors.buttons.openComponent.text} containerStyle={{position: 'absolute', left: 0}} /> : null}
           {currentMessage.custom.buttonTitle}
           {/* this.renderInteractionBadge() */}
         </Button>
@@ -69,10 +77,7 @@ const styles = StyleSheet.create({
     borderRadius: 11
   },
   container: {
-    // marginBottom: 50,
-    marginTop: 20,
-    marginLeft: 60,
-    marginRight: 60,
+    marginVertical: 20,
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center'
@@ -80,13 +85,13 @@ const styles = StyleSheet.create({
   buttonContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 5,
-    paddingLeft: 15,
-    paddingRight: 15,
+    maxWidth: 250,
+    padding: 10,
     minHeight: 35,
+    overflow: 'hidden',
     borderRadius: 16,
     backgroundColor: Colors.buttons.openComponent.background,
-    marginBottom: 4
+    marginBottom: 2
   },
   button: {
     fontSize: 16,

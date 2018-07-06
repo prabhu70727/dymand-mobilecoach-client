@@ -4,7 +4,9 @@ import Immutable from 'seamless-immutable'
 /* ------------- Actions and Action Creators ------------- */
 
 const { Types, Creators } = createActions({
-  startup: null
+  startup: [], // saga
+  manuallyConnect: [], // saga
+  manuallyRequestPushPermissions: [] // saga
 })
 
 export const StartupActions = Types

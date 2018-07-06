@@ -8,15 +8,19 @@ export default {
   // Current instantiation of white label app for project
   project: 'whitelabel',
 
-  // configuration for the project TODO: should we do this similar for bundled translated strings, images, intro page styles etc.?
+  // Configuration of the project
   config: {
     dev: {
       purgeStoreAtStartup: true,
       fakeDeviceAlwaysOnlineForOfflineDev: false,
       allowDebugKeyboard: false
     },
+    storage: {
+      encryptedReduxStorage: false,
+      reduxStorageBlacklist: ['search', 'nav', 'hydrationCompleted', 'serverSyncStatus', 'giftedchatmessages', 'guistate']
+    },
     logger: { // Levels: 'DEBUG', 'INFO', 'WARN', 'ERROR', 'OFF', 'CRASHLYTICS'
-      defaultLevel: 'OFF', // 'OFF' to deactivate the WHOLE logger (also exceptions)
+      defaultLevel: 'DEBUG', // 'OFF' to deactivate the WHOLE logger (also exceptions)
       trackActivities: false,
       trackingURL: 'https://---/piwik/piwik.php',
       trackingId: 0,
@@ -50,7 +54,15 @@ export default {
     },
     messages: {
       initialNumberOfMinimalShownMessages: 10,
-      incrementShownMessagesBy: 25
+      incrementShownMessagesBy: 25,
+      // Show message instead if loading-indicator if chat is empty
+      showEmptyChatMessage: false
+    },
+    startup: {
+      automaticallyRequestPushPermissions: false,
+      automaticallyConnectOnFirstStartup: true,
+      backButtonInOnboardingEnabled: false,
+      onboardingURL: '---'
     },
     serverSync: {
       useLocalServer: true,
@@ -66,6 +78,11 @@ export default {
       remoteRestURL: 'https://---/PMCP/api/v02/'
     },
     whitelabel: {
+      shareUrl: {
+        fr: 'https://www.shareurl-fr.fr',
+        it: 'https://www.shareurl-it.it',
+        de: 'https://www.shareurl-de.de'
+      },
       tourSteps: ['begin', 'tour-start', 'tour-end'],
       tourFile: 'tour/tour.json'
     }

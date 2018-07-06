@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import { View, Alert, Platform, StyleSheet } from 'react-native'
-import { GiftedChat, Bubble, LoadEarlier, Message } from 'react-native-gifted-chat'
+import { View, Alert, Platform } from 'react-native'
+import { GiftedChat, LoadEarlier, Message } from 'react-native-gifted-chat'
 import PMNavigationBar from '../../Components/Navbar'
 import ConnectionStateButton from '../../Components/ConnectionStateButton'
 import { addNavigationHelpers } from 'react-navigation'
@@ -26,15 +26,18 @@ import TextOrNumberInputBubble from '../../Components/CustomMessages/TextOrNumbe
 import DateInput from '../../Components/CustomMessages/DateInput'
 import Likert from '../../Components/CustomMessages/Likert'
 import LikertSlider from '../../Components/CustomMessages/LikertSlider'
+import EmptyChatIndicator from '../../Components/EmptyChatIndicator'
 import TypingIndicator from '../../Components/CustomMessages/TypingIndicator'
 import OfflineStatusIndicator from '../../Components/CustomMessages/OfflineStatusIndicator'
 import Ticks from '../../Components/CustomMessages/Ticks'
-import MultipleChoice from '../../Components/CustomMessages/MultipleChoice'
+import SelectManyComponent from '../../Components/CustomMessages/SelectManyComponent'
 import PMTextBubble from '../../Components/CustomMessages/PMTextBubble'
+import BlankMessage from '../../Components/CustomMessages/BlankMessage'
+import BlankBubble from '../../Components/CustomMessages/BlankBubble'
 // Config
 import AppConfig from '../../Config/AppConfig'
 // Styles & Themes
-import Styles, { TextBubbleStyle, CustomBubbleStyle } from './Styles'
+import Styles, { TextBubbleStyle } from './Styles'
 import {Images} from '../../Themes'
 // Redux
 import {ConnectionStates} from '../../Redux/ServerSyncRedux'
@@ -65,6 +68,21 @@ class Chat extends Component {
     this.renderFooter = this.renderFooter.bind(this)
     this.renderLoadEarlier = this.renderLoadEarlier.bind(this)
     this.showModal = this.showModal.bind(this)
+
+    // If there are still visited-screens in storyProgress-Redux (e.g. user visited screen and left app before returning to chat), send visited-screen intention now!
+    const {visitedScreens} = props.storyProgress
+    if (visitedScreens.length > 0) {
+      visitedScreens.forEach(screen => {
+        this.props.sendIntention(null, screen + '-opened', null)
+      })
+      // clear visited screens again
+      this.props.resetVisitedScreens()
+    }
+  }
+
+  componentDidMount () {
+    // clear Unread-Messages badge
+    this.props.clearUnreadMessages()
   }
 
   getChatProperties = () => {
@@ -121,22 +139,30 @@ class Chat extends Component {
 
   renderMessage (props) {
     const {currentMessage} = props
+    // render unanswered questions as textbubble
+    if (currentMessage.custom && currentMessage.custom.unanswered) {
+      let unansweredMessage = {
+        ...currentMessage,
+        type: 'text',
+        text: I18n.t('Common.answerExpired'),
+        user: {...currentMessage.user, _id: 1}
+      }
+      return <Message {...props} currentMessage={unansweredMessage} />
+    }
+
     switch (currentMessage.type) {
       case 'select-one-button':
       case 'open-component':
       case 'select-many':
       case 'likert':
+      case 'likert-silent':
       case 'likert-slider':
+      case 'likert-silent-slider':
       case 'free-text':
       case 'free-numbers':
       case 'date-input':
-        // Replace Margin with padding for Slide-In Animations on Android (no overflow)
-        return <Message {...props} containerStyle={
-          StyleSheet.create({
-            right: {
-              marginRight: 0
-            }
-          })} />
+        // Blank Message = no Avatar or Date are displayed
+        return <BlankMessage {...props} />
       default:
         return <Message {...props} />
     }
@@ -151,6 +177,23 @@ class Chat extends Component {
     currentMessage.user['name'] = I18n.t('Coaches.' + this.props.coach)
     currentMessage.user['avatar'] = avatar
 
+    // render unanswered questions as textbubble
+    if (currentMessage.custom && currentMessage.custom.unanswered) {
+      let unansweredMessage = {
+        ...currentMessage,
+        type: 'text',
+        text: I18n.t('Common.answerExpired'),
+        user: {...currentMessage.user, _id: 1}
+      }
+      return (
+        <PMTextBubble
+          chatProps={{...props, currentMessage: unansweredMessage}}
+          wrapperStyle={TextBubbleStyle.wrapperStyle}
+          textStyle={{left: {...TextBubbleStyle.textStyle.left, fontStyle: 'italic'}, right: {...TextBubbleStyle.textStyle.right, fontStyle: 'italic'}}}
+        />
+      )
+    }
+
     switch (currentMessage.type) {
       case 'image-message':
       case 'text':
@@ -160,11 +203,13 @@ class Chat extends Component {
       case 'open-component':
       case 'select-many':
       case 'likert':
+      case 'likert-silent':
       case 'likert-slider':
+      case 'likert-silent-slider':
       case 'free-text':
       case 'free-numbers':
       case 'date-input':
-        return this.customMessageBubble(props)
+        return this.renderBlankBubble(props)
       default:
         return null
     }
@@ -193,18 +238,16 @@ class Chat extends Component {
       case 'text':
         return null
       case 'select-one-button':
-        currentMessage.text = '' // we dont want text with these messages
         return this.renderSelectButton(props)
       case 'select-many':
         return this.renderSelectManyButton(props)
       case 'open-component':
-        currentMessage.text = '' // we dont want text with these messages
         return this.renderOpenComponent(props)
       case 'likert':
-        // TODO: Check if we really still need to clear text
-        currentMessage.text = '' // we dont want text with these messages
+      case 'likert-silent':
         return this.renderLikert(props)
       case 'likert-slider':
+      case 'likert-silent-slider':
         return this.renderLikertSlider(props)
       case 'free-text':
       case 'free-numbers':
@@ -216,10 +259,9 @@ class Chat extends Component {
     }
   }
 
-  customMessageBubble (props) {
-    return (<Bubble {...props}
-      wrapperStyle={CustomBubbleStyle.wrapperStyle}
-    />
+  renderBlankBubble (props) {
+    return (
+      <BlankBubble {...props} />
     )
   }
 
@@ -241,7 +283,7 @@ class Chat extends Component {
 
   renderSelectManyButton (props) {
     return (
-      <MultipleChoice
+      <SelectManyComponent
         onPress={(intention, text, value, relatedMessageId) => this.answerAction(intention, text, value, relatedMessageId)}
         currentMessage={props.currentMessage}
         fadeInAnimation='fadeInRight'
@@ -308,6 +350,8 @@ class Chat extends Component {
         fadeInAnimation='flipInX'
         duration={350}
         setAnimationShown={(id) => this.props.markAnimationAsShown(id)}
+        icon={props.currentMessage.text.startsWith('show-backpack-info') ? 'info-with-circle' : undefined}
+        iconType={props.currentMessage.text.startsWith('show-backpack-info') ? 'entypo' : undefined}
       />
     )
   }
@@ -344,7 +388,7 @@ class Chat extends Component {
 
   renderLoadEarlier = (props) => {
     return (
-      <LoadEarlier {...props} label={I18n.t('Chat.loadEarlier')} />
+      <LoadEarlier {...props} label={I18n.t('Chat.loadEarlier')} containerStyle={{marginTop: 20}} />
     )
   }
 
@@ -430,19 +474,19 @@ class Chat extends Component {
       case 'tour': {
         navigation.navigate('Tour')
         // remember that user visited that scree for intentions
-        this.props.visitScreen('Tour')
+        this.props.visitScreen('tour')
         break
       }
       case 'backpack': {
         navigation.navigate('Backpack')
         // remember that user visited that scree for intentions
-        this.props.visitScreen('Backpack')
+        this.props.visitScreen('backpack')
         break
       }
       case 'diary': {
         navigation.navigate('FoodDiary')
         // remember that user visited that scree for intentions
-        this.props.visitScreen('FoodDiary')
+        this.props.visitScreen('diary')
         break
       }
       case 'pyramid': {
@@ -452,7 +496,7 @@ class Chat extends Component {
         })
         navigation.navigate('FoodDiary', {initialTab: 1})
         // remember that user visited that scree for intentions
-        this.props.visitScreen('Pyramid')
+        this.props.visitScreen('pyramid')
         break
       }
       default: break
@@ -534,6 +578,7 @@ class Chat extends Component {
     let showTypingIndicator = false
     let showOfflineIndicator = false
 
+    // TODO: unnecessary first condition?
     if ((coachIsTyping && showOfflineStatusMessage) || coachIsTyping) {
       showTypingIndicator = true
     } else if (showOfflineStatusMessage) {
@@ -545,7 +590,7 @@ class Chat extends Component {
       {this.props.stickyMessages.map((message) => {
         return <Message {...this.getChatProperties()} key={message._id} currentMessage={message} />
       })}
-      {showOfflineIndicator ? <OfflineStatusIndicator {...props} /> : null}
+      <OfflineStatusIndicator active={showOfflineIndicator} />
       {Platform.OS === 'android' ? <KeyboardSpacer /> : null}
     </View>)
   }
@@ -562,10 +607,17 @@ class Chat extends Component {
     }
   }
 
+  renderLoadingIndicator () {
+    return (
+      <EmptyChatIndicator active={this.props.messages.length === 0 && !this.props.guistate.coachIsTyping} emptyChatMessage={AppConfig.config.messages.showEmptyChatMessage ? I18n.t('Chat.emptyChatMessage') : ''} />
+    )
+  }
+
   render () {
     return (
       <View style={Styles.chatContainer}>
         <RepeatingBackgroundImage source={Images.chatBg}>
+          {this.renderLoadingIndicator()}
           {this.renderNavigationbar(this.props)}
           <GiftedChat {...this.getChatProperties()}>
             <ImageCacheProvider />
@@ -597,8 +649,10 @@ const mapStateToDispatch = dispatch => ({
   loadEarlier: () => dispatch(GUIActions.loadEarlier()),
   messageAnsweredByGiftedChat: (relatedMessageId) => dispatch(ServerMessageActions.messageAnsweredByGiftedChat(relatedMessageId)),
   visitScreen: (visitedScreen) => dispatch(StoryProgressActions.visitScreen(visitedScreen)),
+  resetVisitedScreens: () => dispatch(StoryProgressActions.resetVisitedScreens()),
   markMessageAsDisabled: (relatedMessageId) => dispatch(ServerMessageActions.disableMessage(relatedMessageId)),
-  markAnimationAsShown: (messageId) => dispatch(GiftedChatMessageActions.setMessageAnimationFlag(messageId, false))
+  markAnimationAsShown: (messageId) => dispatch(GiftedChatMessageActions.setMessageAnimationFlag(messageId, false)),
+  clearUnreadMessages: (messageId) => dispatch(GUIActions.clearUnreadMessages())
 })
 
 export default connect(mapStateToProps, mapStateToDispatch)(Chat)

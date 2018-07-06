@@ -9,17 +9,17 @@ body {}
 /* Default link styling */
 
 a:link {
-    color: #0271fb;
+    color: #1FA698;
 }
 a:visited {
-    color: #bd02fb;
+    color: #1FA698;
 }
 a:hover,
 a:focus {
-    color: #000;
+    color: #1FA698;
 }
 a:active {
-    color: #fb0e02;
+    color: #1FA698;
 }
 /* ---------------------------------------------------------
    Print styles
@@ -106,7 +106,17 @@ body {
     font-family: 'RobotoRegular';
     font-weight: normal;
     font-style: normal;
-    color: #313F48;
+    color: #525252;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+li {
+  margin-bottom: 15px;
+}
+
+li:last-child {
+  margin-bottom: 0px;
 }
 
 i,
@@ -126,7 +136,7 @@ i b,
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: #313F48;
+    color: #3c3c3c;
 }
 
 h1 {

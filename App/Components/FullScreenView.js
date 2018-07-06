@@ -1,19 +1,24 @@
 import React, {Component} from 'react'
-import {View, Platform} from 'react-native'
+import {View} from 'react-native'
 import PropTypes from 'prop-types'
 import HeaderBar from './HeaderBar'
-import {ifIphoneX} from 'react-native-iphone-x-helper'
 
 export default class FullScreenView extends Component {
   static propTypes = {
     title: PropTypes.string,
-    onBack: PropTypes.func
+    onBack: PropTypes.func,
+    onClose: PropTypes.func,
+    backgroundColor: PropTypes.string
+  }
+
+  static defaultProps = {
+    backgroundColor: '#fff'
   }
 
   render () {
     return (
-      <View style={styles.fullScreenStyle}>
-        <HeaderBar title={this.props.title} onBack={this.props.onBack} containerStyle={(Platform.OS === 'ios') ? {marginTop: 0} : null} />
+      <View style={[styles.fullScreenStyle, {backgroundColor: this.props.backgroundColor}]}>
+        <HeaderBar title={this.props.title} onBack={this.props.onBack} onClose={this.props.onClose} />
         {this.props.children}
       </View>
     )
@@ -23,20 +28,9 @@ export default class FullScreenView extends Component {
 const styles = {
   fullScreenStyle: {
     position: 'absolute',
-    ...Platform.select({
-      ios: {
-        top: 20
-      },
-      android: {
-        top: 0
-      }
-    }),
-    ...ifIphoneX({
-      top: 40
-    }),
+    top: 0,
     left: 0,
     bottom: 0,
-    right: 0,
-    backgroundColor: '#fff'
+    right: 0
   }
 }
