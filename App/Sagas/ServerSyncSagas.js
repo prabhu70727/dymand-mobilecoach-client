@@ -1,6 +1,6 @@
 import { NetInfo, Platform } from 'react-native'
 import { call, select, put, take } from 'redux-saga/effects'
-import { delay, channel, buffers } from 'redux-saga'
+import { delay } from 'redux-saga'
 import createDeepstream from 'deepstream.io-client-js'
 
 import Common from '../Utils/Common'
@@ -35,9 +35,17 @@ let inSync = false
 
 let serverSyncUser = null
 
-const connectionStateChannel = channel(buffers.expanding())
-const incomingMessageChannel = channel(buffers.expanding())
-const outgoingMessageChannel = channel(buffers.expanding())
+let connectionStateChannel = null
+let incomingMessageChannel = null
+let outgoingMessageChannel = null
+
+/* --- Set channels from outside --- */
+export function setChannels (newConnectionStateChannel, newIncomingMessageChannel, newOutgoingMessageChannel) {
+  log.debug('Setting serverSync channels.')
+  connectionStateChannel = newConnectionStateChannel
+  incomingMessageChannel = newIncomingMessageChannel
+  outgoingMessageChannel = newOutgoingMessageChannel
+}
 
 /* --- Register user on server --- */
 export function * initializeServerSync (action) {

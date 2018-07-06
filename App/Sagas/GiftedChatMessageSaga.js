@@ -1,6 +1,6 @@
 // ...
-import { delay, buffers } from 'redux-saga'
-import { take, actionChannel, call, put, select } from 'redux-saga/effects'
+import { delay } from 'redux-saga'
+import { take, call, put, select, fork } from 'redux-saga/effects'
 import R from 'ramda'
 import { DOMParser } from 'react-native-html-parser'
 
@@ -16,42 +16,24 @@ import AppConfig from '../Config/AppConfig'
 import Log from '../Utils/Log'
 const log = new Log('Sagas/GiftedChatMessageSaga')
 
-let chatInitialized = false
-
 let oldestShownMessage = -1
 
 // selectors
 const allMessages = (state) => state.messages
-
 let addedHistoricalMessages = []
 // const getNumberOfMessages = (state) => Object.keys(state.messages).length
 // const getNumberOfShownMessages = state => state.guistate.numberOfShownMessages
 
-export function * initializeGiftedChat (action) {
+export function * initializeGiftedChat ({buffer, newOrUpdatedMessagesChannel}, action) {
   log.info('Initializing gifted chat...')
-
   yield call(loadEarlierMessages)
 
-  chatInitialized = true
+  log.info('Starting to watch for new or updated messages...')
+  yield fork(watchNewOrUpdatedMessageForGiftedChat, {buffer, newOrUpdatedMessagesChannel})
 }
 
 // This saga watches for new messages from the server which will always dispatched with type "NEW_OR_UPDATED_MESSAGE_FOR_GIFTED_CHAT"
-export function * watchNewOrUpdatedMessageForGiftedChat (action) {
-  const buffer = buffers.expanding()
-  const newOrUpdatedMessagesChannel = yield actionChannel(MessageActions.NEW_OR_UPDATED_MESSAGE_FOR_GIFTED_CHAT, buffer)
-
-  // Listen on chat initialization
-  while (true) {
-    if (chatInitialized) {
-      break
-    }
-    yield delay(100)
-  }
-
-  // yield take(GiftedChatMessageActions.GIFTED_CHAT_INITIALIZED)
-
-  log.info('Starting to watch for new or updated messages...')
-
+export function * watchNewOrUpdatedMessageForGiftedChat ({buffer, newOrUpdatedMessagesChannel}, action) {
   while (true) {
     const { message } = yield take(newOrUpdatedMessagesChannel)
     log.debug('New or updated message:', message)

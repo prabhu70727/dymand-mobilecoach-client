@@ -32,7 +32,7 @@ export default class TypingIndicator extends Component {
   renderCustomView () {
     const spinnerProps = {
       type: 'ThreeBounce',
-      color: Colors.messageBubbles.left.font,
+      color: Colors.messageBubbles.left.text,
       isVisible: true,
       size: 28
     }

@@ -125,6 +125,10 @@ const colors = {
     intermediateState: '#fda428',
     successState: '#33A02C'
   },
+  badge: {
+    background: '#E74C3C',
+    text: Brand.colors.primaryText
+  },
   modules: {
     tour: {
       background: Brand.colors.background2

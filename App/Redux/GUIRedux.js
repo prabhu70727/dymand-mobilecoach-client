@@ -1,5 +1,8 @@
 import { createReducer, createActions } from 'reduxsauce'
 import Immutable from 'seamless-immutable'
+import { NavigationActions } from 'react-navigation'
+
+import { GiftedChatMessageActions } from './GiftedChatMessageRedux'
 
 import Log from '../Utils/Log'
 const log = new Log('Redux/GUIRedux')
@@ -24,8 +27,10 @@ const { Types, Creators } = createActions({
   hideLoadEarlier: [],
   loadEarlier: [], // saga
   closeSideMenu: [],
+  setCurrentScreen: ['routeName'],
   disableSidemenuGestures: [],
-  enableSidemenuGestures: []
+  enableSidemenuGestures: [],
+  clearUnreadMessages: []
 })
 
 export const GUIActions = Types
@@ -39,7 +44,10 @@ export const INITIAL_STATE = Immutable({
   showLoadEarlier: false,
   sideMenuOpen: false,
   sideMenuGestures: false,
-  actionButtonUnlocked: false
+  actionButtonUnlocked: false,
+  unreadMessages: 0,
+  // TODO: initial screen shoud not be hardcoded
+  currentScreen: 'LoadingContainer'
 })
 
 /* ------------- Reducers ------------- */
@@ -114,6 +122,32 @@ export const disableSidemenuGestures = (state) => {
   }
 }
 
+export const addUnreadMessage = (state, {message}) => {
+  // dont increment when in Chat
+  if (state.currentScreen === 'Chat') return state
+  else {
+    let unreadMessages = state.unreadMessages + 1
+    return {
+      ...state,
+      unreadMessages
+    }
+  }
+}
+
+export const clearUnreadMessages = (state) => {
+  return {
+    ...state,
+    unreadMessages: 0
+  }
+}
+
+export const setCurrentScreen = (state, {routeName}) => {
+  return {
+    ...state,
+    currentScreen: routeName
+  }
+}
+
 /* ------------- Hookup Reducers To Actions ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -125,5 +159,8 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.TOGGLE_SIDE_MENU]: toggleSideMenu,
   [Types.CLOSE_SIDE_MENU]: closeSideMenu,
   [Types.DISABLE_SIDEMENU_GESTURES]: disableSidemenuGestures,
-  [Types.ENABLE_SIDEMENU_GESTURES]: enableSidemenuGestures
+  [Types.ENABLE_SIDEMENU_GESTURES]: enableSidemenuGestures,
+  [Types.CLEAR_UNREAD_MESSAGES]: clearUnreadMessages,
+  [GiftedChatMessageActions.GIFTED_CHAT_ADD_MESSAGE]: addUnreadMessage,
+  [NavigationActions.navigate]: setCurrentScreen
 })

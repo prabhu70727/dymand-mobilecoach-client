@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import { addNavigationHelpers } from 'react-navigation'
-import { View, BackHandler, Linking } from 'react-native'
+import { View, BackHandler, Linking, Animated } from 'react-native'
 import { connect } from 'react-redux'
 import Toast, {DURATION} from 'react-native-easy-toast'
 import SideMenu from 'react-native-side-menu'
@@ -17,11 +17,17 @@ import I18n from '../I18n/I18n'
 import LoadingOverlay from '../Components/LoadingOverlay'
 import StoryProgressActions from '../Redux/StoryProgressRedux'
 import ServerMessageActions from '../Redux/MessageRedux'
-
 import Log from '../Utils/Log'
+
 const log = new Log('Navigation/ReduxNavigation')
 
 const WWW_URL_PATTERN = /^www\./i
+
+const sideMenuAnimation = (prop, value) => Animated.spring(prop, {
+  toValue: value,
+  friction: 8,
+  useNativeDriver: true
+})
 
 // here is our redux-aware our smart component
 class ReduxNavigation extends Component {
@@ -205,6 +211,7 @@ class ReduxNavigation extends Component {
       <View style={{flex: 1, backgroundColor: Colors.main.appBackground}}>
         <SideMenu
           menu={menu}
+          animationFucntion={sideMenuAnimation}
           disableGestures={!sideMenuGestures}
           isOpen={sideMenuOpen}
           onChange={isOpen => {

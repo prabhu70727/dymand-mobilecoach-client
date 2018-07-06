@@ -1,4 +1,5 @@
-import { takeEvery, all, fork } from 'redux-saga/effects'
+import { takeEvery, all, fork, call, actionChannel } from 'redux-saga/effects'
+import { channel, buffers } from 'redux-saga'
 
 /* ------------- Actions ------------- */
 
@@ -9,9 +10,9 @@ import { SettingsActions } from '../Redux/SettingsRedux'
 
 /* ------------- Sagas ------------- */
 
-import { initializeGiftedChat, loadEarlierMessages, watchNewOrUpdatedMessageForGiftedChat } from './GiftedChatMessageSaga'
+import { initializeGiftedChat, loadEarlierMessages } from './GiftedChatMessageSaga'
 import { sendMessage, sendInvisibleMessage, sendIntention, sendVariableValue, disableMessage, executeCommand, watchMessageUpdateChannel } from './MessageSagas'
-import { initializeServerSync, handleCommands, handleNewClientCreatedMessages, watchConnectionStateChannel, watchIncomingMessageChannel, watchOutgoingMessageChannel } from './ServerSyncSagas'
+import { setChannels, initializeServerSync, handleCommands, handleNewClientCreatedMessages, watchConnectionStateChannel, watchIncomingMessageChannel, watchOutgoingMessageChannel } from './ServerSyncSagas'
 import { updateLanguage } from './SettingsSagas'
 import { watchCommandToExecute } from './FoodDiarySaga'
 
@@ -24,6 +25,16 @@ import { watchCommandToExecute } from './FoodDiarySaga'
 /* ------------- Connect Actions To Sagas ------------- */
 
 export default function * root () {
+  // Server Messages
+  const connectionStateChannel = yield call(channel, buffers.expanding())
+  const incomingMessageChannel = yield call(channel, buffers.expanding())
+  const outgoingMessageChannel = yield call(channel, buffers.expanding())
+  setChannels(connectionStateChannel, incomingMessageChannel, outgoingMessageChannel)
+
+  // GiftedChat Messages
+  const buffer = buffers.expanding()
+  const newOrUpdatedMessagesChannel = yield actionChannel(MessageActions.NEW_OR_UPDATED_MESSAGE_FOR_GIFTED_CHAT, buffer)
+
   yield all([
     // Settings Saga
     takeEvery(SettingsActions.CHANGE_LANGUAGE, updateLanguage),
@@ -31,11 +42,9 @@ export default function * root () {
     // FoodDiary Saga
     yield fork(watchCommandToExecute),
 
-    // Gifted Chat (top layer)
-    takeEvery(StartupActions.STARTUP, initializeGiftedChat),
+    // GiftedChat (top layer)
+    takeEvery(StartupActions.STARTUP, initializeGiftedChat, {buffer, newOrUpdatedMessagesChannel}),
     takeEvery(GUIActions.LOAD_EARLIER, loadEarlierMessages),
-
-    yield fork(watchNewOrUpdatedMessageForGiftedChat),
 
     // Messages (middle layer)
     takeEvery(MessageActions.SEND_MESSAGE, sendMessage),

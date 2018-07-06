@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import ServerMessageActions from '../Redux/MessageRedux'
 import StoryProgressActions from '../Redux/StoryProgressRedux'
 import { Images, Colors } from '../Themes/'
+import {badgeStyles} from './Badge'
 
 import Log from '../Utils/Log'
 const log = new Log('Components/Menu')
@@ -25,7 +26,8 @@ class Menu extends Component {
         name: 'Chat',
         label: 'Menu.Chat',
         leftIcon: <View style={styles.circle}><Icon name='ios-nutrition' style={styles.actionButtonIcon} /></View>,
-        modal: false
+        modal: false,
+        badge: () => this.getChatBadge()
       },
       tour: {
         name: 'Tour',
@@ -63,6 +65,19 @@ class Menu extends Component {
         subtitle: '',
         modal: false
       }
+    }
+  }
+
+  getChatBadge () {
+    if (this.props.unreadMessages === 0) return null
+    else {
+      let value = this.props.unreadMessages
+      if (value > 99) value = '99+'
+      return ({
+        value,
+        textStyle: badgeStyles.textStyle,
+        containerStyle: badgeStyles.containerStyle
+      })
     }
   }
   // remember the screens visited before returning to chat
@@ -112,7 +127,7 @@ class Menu extends Component {
                 title={I18n.t(l.label, {locale: this.props.language})}
                 // subtitle={l.subtitle}
                 hideChevron
-                // badge={{value: 3, containerStyle: styles.badge}}
+                badge={l.badge ? l.badge() : null}
                 titleStyle={{color: Colors.sideMenu.text}}
               />
             ))
@@ -131,7 +146,8 @@ const mapStateToProps = (state) => {
   return {
     language: state.settings.language,
     storyProgress: state.storyProgress,
-    coach: state.settings.coach
+    coach: state.settings.coach,
+    unreadMessages: state.guistate.unreadMessages
   }
 }
 
@@ -174,9 +190,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15
-  },
-  badge: {
-    backgroundColor: Colors.buttons.common.background
   },
   image: {flex: 1, alignSelf: 'stretch', resizeMode: 'contain'}
 })

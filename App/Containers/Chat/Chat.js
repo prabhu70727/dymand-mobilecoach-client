@@ -80,6 +80,11 @@ class Chat extends Component {
     }
   }
 
+  componentDidMount () {
+    // clear Unread-Messages badge
+    this.props.clearUnreadMessages()
+  }
+
   getChatProperties = () => {
     return ({
       // general configuration (Locale, Time, user, etc.)
@@ -646,7 +651,8 @@ const mapStateToDispatch = dispatch => ({
   visitScreen: (visitedScreen) => dispatch(StoryProgressActions.visitScreen(visitedScreen)),
   resetVisitedScreens: () => dispatch(StoryProgressActions.resetVisitedScreens()),
   markMessageAsDisabled: (relatedMessageId) => dispatch(ServerMessageActions.disableMessage(relatedMessageId)),
-  markAnimationAsShown: (messageId) => dispatch(GiftedChatMessageActions.setMessageAnimationFlag(messageId, false))
+  markAnimationAsShown: (messageId) => dispatch(GiftedChatMessageActions.setMessageAnimationFlag(messageId, false)),
+  clearUnreadMessages: (messageId) => dispatch(GUIActions.clearUnreadMessages())
 })
 
 export default connect(mapStateToProps, mapStateToDispatch)(Chat)

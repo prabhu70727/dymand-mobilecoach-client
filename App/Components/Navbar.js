@@ -1,35 +1,72 @@
 import React, {Component} from 'react'
-import {Platform} from 'react-native'
+import {Platform, View} from 'react-native'
 import {connect} from 'react-redux'
 import NavigationBar from 'react-native-navbar'
 import {ifIphoneX} from 'react-native-iphone-x-helper'
 
 import {Metrics, Colors} from '../Themes/'
-import NavBarButton from '../Components/NavBarButton'
+import NavBarButton from './NavBarButton'
 import GUIActions from '../Redux/GUIRedux'
+import Badge from './Badge'
 
 class PMNavigationBar extends Component {
   render () {
     const {title, toggleSideMenu, rightButton} = this.props
     return (
-      <NavigationBar
-        {...NavigationBarStyles}
-        title={{
-          title: title,
-          tintColor: NavigationBarStyles.title.tintColor
-        }}
-        leftButton={
-          <NavBarButton
-            position='left'
-            icon='ios-menu'
-            onPress={() => toggleSideMenu()} />
+      <View style={styles.wrapper}>
+        <NavigationBar
+          {...NavigationBarStyles}
+          title={{
+            title: title,
+            tintColor: NavigationBarStyles.title.tintColor
+          }}
+          leftButton={
+            <NavBarButton
+              position='left'
+              icon='ios-menu'
+              onPress={() => toggleSideMenu()} />
         }
-        rightButton={rightButton}
-      />
+          rightButton={rightButton}
+          />
+        <Badge containerStyle={styles.badgeContainer} onPress={() => toggleSideMenu()} />
+      </View>
     )
   }
 }
-
+const badgeTopPosition = Metrics.navbarHeight / 2 - 19
+const styles = {
+  wrapper: {
+    backgroundColor: Colors.navigationBar.background,
+    elevation: 4,
+    shadowColor: 'black',
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    shadowOffset: {
+      height: 2
+    },
+    // We don't need zIndex on Android, disable it since it's buggy
+    zIndex: Platform.OS === 'android' ? 0 : 1
+  },
+  badgeContainer: {
+    position: 'absolute',
+    elevation: 5,
+    ...Platform.select({
+      ios: {
+        ...ifIphoneX({
+          top: badgeTopPosition + 40
+        }, {
+          top: badgeTopPosition + 20
+        })
+      },
+      android: {
+        top: badgeTopPosition
+      }
+    }),
+    left: 24,
+    justifyContent: 'center',
+    alignItems: 'flex-start'
+  }
+}
 const NavigationBarStyles = {
   containerStyle: {
     height: Metrics.navbarHeight,
@@ -47,15 +84,6 @@ const NavigationBarStyles = {
       }
     }),
     justifyContent: 'center',
-    elevation: 4,
-    shadowColor: 'black',
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    shadowOffset: {
-      height: 2
-    },
-    // We don't need zIndex on Android, disable it since it's buggy
-    zIndex: Platform.OS === 'android' ? 0 : 1,
     backgroundColor: Colors.navigationBar.background
   },
   statusBar: {

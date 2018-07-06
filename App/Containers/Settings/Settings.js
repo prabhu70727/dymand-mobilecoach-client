@@ -17,6 +17,7 @@ import ServerMessageActions from '../../Redux/MessageRedux'
 import PDFGenerator from '../../Utils/PDFGenerator'
 import AppConfig from '../../Config/AppConfig'
 import FeedbackForm from './FeedbackForm'
+// import SendDebugStateButton from './SendDebugStateButton'
 
 import Log from '../../Utils/Log'
 const log = new Log('Containers/Settings/Settings')
@@ -132,6 +133,18 @@ class Settings extends Component {
             >
             <FeedbackForm onSubmit={(name, email, feedback) => this.onSendFeedback(name, email, feedback)} onFeedbackFocus={() => { if (this.refs.scrollView && Platform.OS === 'ios') this.refs.scrollView.scrollToEnd() }} />
           </Card>
+          {/* <Card
+            title={'SEND DEBUG STATE'}
+            titleStyle={styles.cardTitle}
+            containerStyle={{marginBottom: 20}}
+            >
+            <SendDebugStateButton>
+              <View>
+                <Text>Send Debug state</Text>
+              </View>
+            </SendDebugStateButton>
+          </Card>
+          */}
         </ScrollView>
         {(Platform.OS === 'ios') ? <KeyboardSpacer /> : null}
       </View>
