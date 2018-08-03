@@ -2,11 +2,10 @@
 // TODO for improvement check: https://github.com/idibidiart/react-native-responsive-grid/blob/master/UniversalTiles.md
 
 import React, { Component } from 'react'
-import { Text, View, StyleSheet, ScrollView, Platform, Share, Alert } from 'react-native'
+import { Text, View, StyleSheet, ScrollView, Platform, Share } from 'react-native'
 import ParsedText from 'react-native-parsed-text'
 import { connect } from 'react-redux'
 import KeyboardSpacer from 'react-native-keyboard-spacer'
-import { Crashlytics } from 'react-native-fabric'
 
 // import { NavigationActions } from 'react-navigation'
 import {Colors} from '../../Themes/'
@@ -17,6 +16,8 @@ import NextButton from '../../Components/NextButton'
 import ServerMessageActions from '../../Redux/MessageRedux'
 import PDFGenerator from '../../Utils/PDFGenerator'
 import AppConfig from '../../Config/AppConfig'
+import FeedbackForm from './FeedbackForm'
+// import SendDebugStateButton from './SendDebugStateButton'
 
 import Log from '../../Utils/Log'
 const log = new Log('Containers/Settings/Settings')
@@ -126,36 +127,22 @@ class Settings extends Component {
             </View>
           </Card>
           <Card
-            title='Development'
+            title={I18n.t('Settings.feedbackForm.title')}
             titleStyle={styles.cardTitle}
             containerStyle={{marginBottom: 20}}
             >
-            <View key={1}>
-              <NextButton
-                styleButton={styles.button}
-                styleText={styles.buttonText}
-                text={I18n.t('Settings.debugReport')}
-                onPress={() => {
-                  log.problem('ProblemState', JSON.stringify(this.props.wholeState))
-                  log.error('State reported as incorrect by user!')
-                  Alert.alert(
-                    'Thank you! 👍',
-                    'The app will now stop after selecting "Ok". Please restart the app afterwards, so that the error report can be sent in the background. After that, the app can be used normally again.',
-                    [
-                      {text: 'Ok',
-                        onPress: () => {
-                          if (!__DEV__) {
-                            Crashlytics.crash()
-                          }
-                          return true
-                        }
-                      }
-                    ],
-                    { cancelable: false }
-                  )
-                }}
-                />
-            </View>
+            <FeedbackForm onSubmit={(name, email, feedback) => this.onSendFeedback(name, email, feedback)} onFeedbackFocus={() => { if (this.refs.scrollView && Platform.OS === 'ios') this.refs.scrollView.scrollToEnd() }} />
+          </Card>
+          {/* <Card
+            title={'SEND DEBUG STATE'}
+            titleStyle={styles.cardTitle}
+            containerStyle={{marginBottom: 20}}
+            >
+            <SendDebugStateButton>
+              <View>
+                <Text>Send Debug state</Text>
+              </View>
+            </SendDebugStateButton>
           </Card>
           */}
         </ScrollView>

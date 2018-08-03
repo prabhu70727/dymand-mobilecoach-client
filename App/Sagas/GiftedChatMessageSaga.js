@@ -1,8 +1,6 @@
-// ...
 import { delay } from 'redux-saga'
 import { take, call, put, select, fork } from 'redux-saga/effects'
 import R from 'ramda'
-import { DOMParser } from 'react-native-html-parser'
 
 import Common from '../Utils/Common'
 // Import Reducers / Actions for Chat Messages
@@ -10,7 +8,7 @@ import { GiftedChatMessageActions } from '../Redux/GiftedChatMessageRedux'
 import { MessageActions, AuthorTypes, MessageStates } from '../Redux/MessageRedux'
 // Import Reducers / Actions for Chat Messages
 import { GUIActions } from '../Redux/GUIRedux'
-import { StoryProgressActions } from '../Redux/StoryProgressRedux'
+// import { StoryProgressActions } from '../Redux/StoryProgressRedux'
 import AppConfig from '../Config/AppConfig'
 
 import Log from '../Utils/Log'
@@ -58,7 +56,7 @@ export function * watchNewOrUpdatedMessageForGiftedChat ({buffer, newOrUpdatedMe
         yield put({ type: MessageActions.MESSAGE_FAKE_TIMESTAMP_FOR_GIFTED_CHAT, messageId: message['client-id'], fakeTimestamp })
       }
       // Convert the servermessage to giftedchat-format
-      let giftedChatMessages = yield call(parseServerMessage, message, fakeTimestamp)
+      let giftedChatMessages = parseServerMessage(message, fakeTimestamp)
 
       // Messages with faked timestamps should be shown with typing delay, others not
       if (fakeTimestamp == null) {
@@ -90,12 +88,15 @@ export function * loadEarlierMessages () {
 
   let minimalMessagesToLoad = 0
   let messageToStart = 0
+  let startup
   if (oldestShownMessage === -1) {
     log.debug('Startup case...')
+    startup = true
     minimalMessagesToLoad = AppConfig.config.messages.initialNumberOfMinimalShownMessages
     messageToStart = messagesKeys.length - 1
   } else {
     log.debug('Load earlier case...')
+    startup = false
     minimalMessagesToLoad = AppConfig.config.messages.incrementShownMessagesBy
     messageToStart = oldestShownMessage - 1
   }
@@ -107,19 +108,21 @@ export function * loadEarlierMessages () {
   let onlyStickyMessages = false
   for (let i = messageToStart; i >= 0; i--) {
     const messageToAdd = { ...messages[messagesKeys[i]] }
-    let giftedChatMessages = yield call(parseServerMessage, messageToAdd)
+    let giftedChatMessages = parseServerMessage(messageToAdd)
 
     // Cancel if already shown enough messages
     if (addedMessages >= minimalMessagesToLoad && messageToAdd['client-read']) {
       onlyStickyMessages = true
     }
 
-    if (!onlyStickyMessages) {
+    if (startup) {
       // Remember commands
-      if (giftedChatMessages.length === 1 && giftedChatMessages[0].type === 'hidden-command') {
+      if ((typeof messageToAdd['client-command-executed'] === 'undefined' || messageToAdd['client-command-executed'] === false) && giftedChatMessages.length >= 1 && giftedChatMessages[0].type === 'hidden-command') {
         commandsToCheck.unshift(giftedChatMessages[0])
       }
+    }
 
+    if (!onlyStickyMessages) {
       // Remeber oldest shown message
       oldestShownMessage = i
 
@@ -298,17 +301,17 @@ function calculateMessageDelay (message) {
   return ms
 }
 
-function * parseServerMessage (serverMessage, fakeTimestamp = null) {
+function parseServerMessage (serverMessage, fakeTimestamp = null) {
   try {
-    let giftedChatMessages = yield call(convertServerMessageToGiftedChatMessages, serverMessage, fakeTimestamp)
+    let giftedChatMessages = convertServerMessageToGiftedChatMessages(serverMessage, fakeTimestamp)
     return giftedChatMessages
   } catch (error) {
-    log.error('Error: Failed to convert Server-Message to GiftedChat-Message:', error)
+    log.error('Error: Failed to convert Server-Message to GiftedChat-Message:', error.toString())
     return []
   }
 }
 
-function * convertServerMessageToGiftedChatMessages (serverMessage, fakeTimestamp = null) {
+function convertServerMessageToGiftedChatMessages (serverMessage, fakeTimestamp = null) {
   // Actively ignore specific types
   if (serverMessage.type === 'VARIABLE') {
     return []
@@ -430,16 +433,22 @@ function * convertServerMessageToGiftedChatMessages (serverMessage, fakeTimestam
             content,
             // Component to be opened on Tap
             component: 'rich-text',
-            buttonTitle: buttonTitle,
-            infoId: parsedCommand.value
+            buttonTitle: buttonTitle
           }
           // Only remember backpack infos
           if (parsedCommand.command === 'show-backpack-info') {
             if (parsedCommand.value === null) log.warn('Received show-backpack-info without id! Command: ' + serverMessage['server-message'])
             else {
-              let info = formatInfoMessage(serverMessage)
-              info.id = parsedCommand.value
-              yield put({ type: StoryProgressActions.ADD_BACKPACK_INFO, info })
+              // Add a seperate message to execute addInfoCommand
+              let addInfoCommandMessage = R.clone(message)
+              // No need to double store content because it will be loaded from serverMessage using the related-id
+              addInfoCommandMessage.content = ''
+              addInfoCommandMessage.type = 'hidden-command'
+              addInfoCommandMessage._id = serverMessage['client-id'] + '-' + subId++
+              messages.push(addInfoCommandMessage)
+
+              message.custom.component = 'backpack-info'
+              message.custom.content = parsedCommand.value
             }
           }
           break
@@ -701,34 +710,5 @@ function * convertServerMessageToGiftedChatMessages (serverMessage, fakeTimestam
       message.custom.unanswered = true
     }
   })
-
   return messages
-}
-
-function formatInfoMessage (serverMessage) {
-  let content = serverMessage.content  // .replace(/\n/g, '')
-  let parsedTags = new DOMParser().parseFromString(content, 'text/html')
-  let meta = parsedTags.getElementsByTagName('meta')[0]
-  let title = ''
-  let subtitle = ''
-  if (meta) {
-    title = meta.getAttribute('title').replace('\\n', '\n')
-    subtitle = meta.getAttribute('subtitle').replace('\\n', '\n')
-  }
-
-  // Remove Button
-  const pattern = new RegExp('<button>(.*)</button>', 'g')
-  const regExpResult = pattern.exec(content)
-  if (regExpResult) {
-    content = content.replace(regExpResult[0], '')
-  }
-  return {
-    // Info-Content delievered by server in DS-Message
-    content,
-    // Component to be opened on Tap
-    component: 'rich-text',
-    title,
-    subtitle,
-    time: serverMessage['message-timestamp']
-  }
 }

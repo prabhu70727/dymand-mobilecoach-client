@@ -9,6 +9,11 @@ const LEVEL_VALUES = { DEBUG: 0, INFO: 1, WARN: 2, ERROR: 3, OFF: 4, CRASHLYTICS
 
 const loggerLength = 20
 
+const loggingCache = []
+const loggingCacheSize = 500
+let loggingCacheIndex = 0
+let loggingCacheCount = 0
+
 const defaultLevel = LEVEL_VALUES[AppConfig.config.logger.defaultLevel === undefined ? 'OFF' : AppConfig.config.logger.defaultLevel]
 const loggerLevels = AppConfig.config.logger.loggerLevels === undefined ? {} : AppConfig.config.logger.loggerLevels
 
@@ -54,6 +59,10 @@ export default class Log {
   error (message) {
     this.problem('ErrorOccured', Log.formatMessage(this.loggerName, LEVEL_TEXTS.ERROR, null, (arguments !== undefined && arguments !== null) ? Array.prototype.slice.call(arguments) : null))
     Log.writeLog(this.loggerName, LEVEL_VALUES.ERROR, arguments)
+  }
+
+  getCache () {
+    return loggingCache
   }
 
   // Example: ProblemState, JSON...[, 0]
@@ -136,6 +145,14 @@ export default class Log {
           Crashlytics.logException('Exception - triggered by logger')
         }
       }
+
+      loggingCache[loggingCacheIndex] = loggingCacheCount + ': ' + loggingMessage
+      loggingCacheIndex++
+      loggingCacheCount++
+      if (loggingCacheIndex === loggingCacheSize) {
+        loggingCacheIndex = 0
+      }
+
       return
     }
 

@@ -35,9 +35,8 @@ export const INITIAL_STATE = Immutable({
 
 /* ------------- Reducers ------------- */
 
-export const handleProgressCommand = (state, {command, content}) => {
+export const handleProgressCommand = (state, {command, content, timestamp}) => {
   const parsedCommand = Common.parseCommand(command)
-
   switch (parsedCommand.command) {
     case 'complete-tutorial':
       return {
@@ -74,6 +73,17 @@ export const handleProgressCommand = (state, {command, content}) => {
         ...state,
         actionButtonActive: false
       }
+    case 'show-backpack-info':
+      const info = Common.formatInfoMessage(content, timestamp)
+      let newBackpackInfo = R.clone(state.backpackInfo)
+      const id = parsedCommand.value
+      // Add new info under the given ID
+      if (id) newBackpackInfo[id] = info
+      else log.warn('Could not add BackpackInfo to Redux-Store, because no ID was defined. (Info-Title: ' + info.title + ')')
+      return {
+        ...state,
+        backpackInfo: newBackpackInfo
+      }
     default:
       return state
   }
@@ -85,19 +95,6 @@ export const visitScreen = (state, {visitedScreen}) => {
   return {
     ...state,
     visitedScreens: newVisitedScreens
-  }
-}
-
-export const addBackpackInfo = (state, {info}) => {
-  // newInfo = r.cloneDeep(backpackInfo)
-  let newBackpackInfo = R.clone(state.backpackInfo)
-  const {id} = info
-  // Add new info under the given ID
-  if (id) newBackpackInfo[id] = info
-  else log.warn('Could not add BackpackInfo to Redux-Store, because no ID was defined. (Info-Title: ' + info.title + ')')
-  return {
-    ...state,
-    backpackInfo: newBackpackInfo
   }
 }
 
@@ -116,6 +113,5 @@ export const resetVisitedScreens = (state) => {
 export const reducer = createReducer(INITIAL_STATE, {
   [MessageActions.COMMAND_TO_EXECUTE]: handleProgressCommand,
   [Types.VISIT_SCREEN]: visitScreen,
-  [Types.RESET_VISITED_SCREENS]: resetVisitedScreens,
-  [Types.ADD_BACKPACK_INFO]: addBackpackInfo
+  [Types.RESET_VISITED_SCREENS]: resetVisitedScreens
 })

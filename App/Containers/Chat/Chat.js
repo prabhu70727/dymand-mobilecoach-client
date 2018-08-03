@@ -419,9 +419,9 @@ class Chat extends Component {
 
   notifyServer (component, currentMessage = null) {
     switch (component) {
-      case 'rich-text': {
-        if (currentMessage.custom.infoId) {
-          let intention = 'info-' + currentMessage.custom.infoId + '-closed'
+      case 'backpack-info': {
+        if (currentMessage.custom.content) {
+          let intention = 'info-' + currentMessage.custom.content + '-closed'
           this.props.sendIntention(null, intention, null)
         } else log.warn('Cannot send info-openend-notification for message: ' + currentMessage.text + ', because info-id is undefined.')
         break
@@ -457,6 +457,11 @@ class Chat extends Component {
       case 'rich-text': {
         let onClose = () => { this.notifyServer(component, currentMessage) }
         showModal(component, {htmlMarkup: content}, onClose)
+        break
+      }
+      case 'backpack-info': {
+        let onClose = () => { this.notifyServer(component, currentMessage) }
+        showModal('rich-text', {htmlMarkup: this.props.storyProgress.backpackInfo[content].content}, onClose)
         break
       }
       case 'web': {

@@ -40,7 +40,7 @@ class SendDebugStateButton extends Component {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(wholeState)
+      body: JSON.stringify({ state: wholeState, log: log.getCache() })
     }).then((response) => {
       log.debug('App data successfully sent to server.')
       Alert.alert(

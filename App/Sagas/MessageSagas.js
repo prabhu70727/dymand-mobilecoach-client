@@ -116,7 +116,7 @@ export function * executeCommand (action) {
   if (relatedMessage !== undefined) {
     if (relatedMessage['client-command-executed'] === undefined || !relatedMessage['client-command-executed']) {
       log.info('Command not executed yet, so execute it now...')
-      yield put({type: MessageActions.COMMAND_TO_EXECUTE, command: relatedMessage['server-message'], content: relatedMessage['content']})
+      yield put({type: MessageActions.COMMAND_TO_EXECUTE, command: relatedMessage['server-message'], content: relatedMessage['content'], timestamp: relatedMessage['message-timestamp']})
       yield put({type: MessageActions.COMMAND_EXECUTED, messageId})
     }
   }
