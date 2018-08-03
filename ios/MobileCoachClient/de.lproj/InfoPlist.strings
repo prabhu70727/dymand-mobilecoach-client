@@ -1,0 +1,10 @@
+/* 
+  InfoPlist.strings
+  WhitelabelApp
+
+  Created by Andreas Filler on 01.08.18.
+  Copyright © 2018 Pathmate Technologies. All rights reserved.
+*/
+"NSCameraUsageDescription" = "Wir benötigen Zugriff auf deine Kamera, um es dir zu ermöglichen Fotos zu schiessen oder grafische Codes zu scannen";
+"NSLocationWhenInUseUsageDescription" = "Wir benötigen Zugriff auf deine Position, um es dir zu ermöglichen....´";
+"NSMicrophoneUsageDescription" = "Wir benötigen Zugriff auf dein Mikrofon, um es dir zu ermöglichen Audioschnipsel aufzuzeichnen";

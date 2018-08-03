@@ -14,8 +14,14 @@ const iconProps = {
 export default class HeaderBar extends Component {
   static propTypes = {
     title: PropTypes.string,
-    onBack: PropTypes.func,
-    onClose: PropTypes.func,
+    onBack: PropTypes.oneOfType([
+      PropTypes.func,
+      PropTypes.bool
+    ]),
+    onClose: PropTypes.oneOfType([
+      PropTypes.func,
+      PropTypes.bool
+    ]),
     confirmClose: PropTypes.string,
     containerStyle: ViewPropTypes.style
   }

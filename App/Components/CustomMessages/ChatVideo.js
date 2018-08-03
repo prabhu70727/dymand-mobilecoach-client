@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { View } from 'react-native'
+
+import {inputMessageStyles} from './Styles/CommonStyles'
 import PropTypes from 'prop-types'
 import {Metrics} from '../../Themes/'
 import Video from '../Video/Video.js'
@@ -15,7 +17,7 @@ export default class ChatVideo extends Component {
   render () {
     let width = Metrics.screenWidth - 135
     return (
-      <View style={styles.videoContainer}>
+      <View style={[inputMessageStyles.mediaContent, {overflow: 'hidden'}]}>
         <Video
           width={width}
           source={this.props.source}
@@ -29,11 +31,3 @@ export default class ChatVideo extends Component {
     )
   }
 }
-
-const styles = StyleSheet.create({
-  videoContainer: {
-    borderRadius: 13,
-    margin: 5,
-    overflow: 'hidden'
-  }
-})

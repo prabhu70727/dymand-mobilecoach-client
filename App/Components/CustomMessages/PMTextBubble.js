@@ -11,13 +11,21 @@ export default class PMTextBubble extends Component {
     currentMessage: PropTypes.object
   }
 
+  // Checks if chat-bubble should be animated or not
+  bubbleShouldBeAnimated () {
+    const { currentMessage } = this.props.chatProps
+    return (currentMessage.user._id === 1 && currentMessage.custom.clientStatus === MessageStates.PREPARED_FOR_SENDING &&
+      (currentMessage.custom.mediaType !== 'video' &&
+      currentMessage.custom.mediaType !== 'image' &&
+      currentMessage.custom.mediaType !== 'audio'))
+  }
+
   render () {
     const {chatProps} = this.props
-    const {currentMessage} = chatProps
     // If the Message is a user message, and it has just has been sent, check if there should be an fadeIn-Animation
-    if (currentMessage.user._id === 1) {
+    if (this.bubbleShouldBeAnimated()) {
       return (
-        <Animatable.View useNativeDriver animation={(currentMessage.custom.clientStatus === MessageStates.PREPARED_FOR_SENDING) ? this.props.appearInAnimationLeft : null} duration={350}>
+        <Animatable.View useNativeDriver animation={this.props.appearInAnimationLeft} duration={350}>
           <Bubble {...chatProps}
             wrapperStyle={this.props.wrapperStyle}
             textStyle={this.props.textStyle}

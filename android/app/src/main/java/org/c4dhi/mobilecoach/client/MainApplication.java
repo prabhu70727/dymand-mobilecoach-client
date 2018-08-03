@@ -3,6 +3,10 @@ package org.c4dhi.mobilecoach.client;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import fr.bamlab.rnimageresizer.ImageResizerPackage;
+import com.zmxv.RNSound.RNSoundPackage;
+import com.rnim.rn.audio.ReactNativeAudioPackage;
+import org.reactnative.camera.RNCameraPackage;
 import com.github.wumke.RNExitApp.RNExitAppPackage;
 import br.com.classapp.RNSensitiveInfo.RNSensitiveInfoPackage;
 import com.brentvatne.react.ReactVideoPackage;
@@ -42,6 +46,10 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new ImageResizerPackage(),
+            new RNSoundPackage(),
+            new ReactNativeAudioPackage(),
+            new RNCameraPackage(),
             new RNExitAppPackage(),
             new RNSensitiveInfoPackage(),
             new ReactVideoPackage(),

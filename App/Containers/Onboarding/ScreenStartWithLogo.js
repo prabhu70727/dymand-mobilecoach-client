@@ -55,7 +55,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'space-around',
-    marginHorizontal: 30
+    marginHorizontal: 30,
+    alignSelf: 'stretch'
   },
   title: {fontSize: 30, fontWeight: 'bold', color: Colors.onboarding.text, textAlign: 'center'},
   subtitle: {

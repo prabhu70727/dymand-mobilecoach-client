@@ -335,7 +335,7 @@ export default class Lightbox extends Component {
                 cached
                 // the Lightbox has it's own activity-Indicator, so we dont want
                 // the indicator from responsive-image to be displayed as well
-                activityIndicatorProps={{color: 'transparent'}}
+                activityIndicatorColor='transparent'
                 ref={img => { this.img = img }}
                 source={source}
                 width={INIT_IMAGE_WIDTH}

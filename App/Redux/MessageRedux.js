@@ -10,7 +10,7 @@ const log = new Log('Redux/MessageRedux')
 /* ------------- Actions and Action Creators ------------- */
 
 const { Types, Creators } = createActions({
-  sendMessage: ['text', 'value', 'relatedMessageId'], // saga
+  sendMessage: ['text', 'value', 'relatedMessageId', 'containsMedia'], // saga
   sendInvisibleMessage: ['value', 'relatedMessageId'], // saga
   sendIntention: ['text', 'intention', 'content'], // saga
   sendVariableValue: ['variable', 'value'], // saga
@@ -21,13 +21,14 @@ const { Types, Creators } = createActions({
   commandToExecute: ['command', 'content'],
   commandExecuted: ['messageId'],
   messageReadByGiftedChat: ['messageId'],
+  messageMediaUploading: ['messageId', 'uploadPath'],
   messageFakeTimestampForGiftedChat: ['messageId', 'fakeTimestamp'],
   messageUnStickedByGiftedChat: ['messageId'],
   disableMessage: ['messageId'], // saga
   messageDisabledByGiftedChat: ['messageId']
 })
 
-export const MessageStates = { PREPARED_FOR_SENDING: 'PREPARED_FOR_SENDING', SENT: 'SENT', PROCESSED_BY_SERVER: 'PROCESSED_BY_SERVER', RECEIVED: 'RECEIVED', OPEN_QUESTION: 'OPEN_QUESTION', ANSWERED_ON_CLIENT: 'ANSWERED_ON_CLIENT', ANSWERED_AND_PROCESSED_BY_SERVER: 'ANSWERED_AND_PROCESSED_BY_SERVER', NOT_ANSWERED_AND_PROCESSED_BY_SERVER: 'NOT_ANSWERED_AND_PROCESSED_BY_SERVER' }
+export const MessageStates = { PREPARED_FOR_SENDING: 'PREPARED_FOR_SENDING', SENT: 'SENT', PROCESSED_BY_SERVER: 'PROCESSED_BY_SERVER', RECEIVED: 'RECEIVED', OPEN_QUESTION: 'OPEN_QUESTION', ANSWERED_ON_CLIENT: 'ANSWERED_ON_CLIENT', ANSWERED_AND_PROCESSED_BY_SERVER: 'ANSWERED_AND_PROCESSED_BY_SERVER', NOT_ANSWERED_AND_PROCESSED_BY_SERVER: 'NOT_ANSWERED_AND_PROCESSED_BY_SERVER', UPLOADING_MEDIA_CONTENT: 'UPLOADING_MEDIA_CONTENT' }
 export const AuthorTypes = { SERVER: 'SERVER', USER: 'USER' }
 
 export const MessageActions = Types
@@ -186,6 +187,18 @@ export const messageReadByGiftedChat = (state, { messageId }) => {
   }
 }
 
+// Remember that a message has been read in the GUI
+export const messageMediaUploading = (state, { messageId, uploadPath }) => {
+  const mergedMessageToStore = R.merge(state[messageId], {'media-upload-path': uploadPath})
+
+  // Care for client version
+  mergedMessageToStore['client-version'] = mergedMessageToStore['client-version'] + 1
+
+  return { ...state,
+    [messageId]: mergedMessageToStore
+  }
+}
+
 // Remember fake timestamp used to display message in the GUI
 export const messageFakeTimestampForGiftedChat = (state, { messageId, fakeTimestamp = null }) => {
   const mergedMessageToStore = R.clone(state[messageId])
@@ -234,6 +247,7 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.COMMAND_TO_EXECUTE]: null,
   [Types.COMMAND_EXECUTED]: commandExecuted,
   [Types.MESSAGE_READ_BY_GIFTED_CHAT]: messageReadByGiftedChat,
+  [Types.MESSAGE_MEDIA_UPLOADING]: messageMediaUploading,
   [Types.MESSAGE_FAKE_TIMESTAMP_FOR_GIFTED_CHAT]: messageFakeTimestampForGiftedChat,
   [Types.MESSAGE_UN_STICKED_BY_GIFTED_CHAT]: messageUnStickedByGiftedChat,
   [Types.MESSAGE_DISABLED_BY_GIFTED_CHAT]: messageDisabledByGiftedChat

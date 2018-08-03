@@ -3,9 +3,10 @@ import { View, Platform, ActivityIndicator } from 'react-native'
 import RNFetchBlob from 'react-native-fetch-blob'
 import RNFS from 'react-native-fs'
 import PropTypes from 'prop-types'
-import {Metrics} from '../../Themes/'
+import {Metrics, Colors} from '../../Themes/'
 import BottomControls from './BottomControls'
 import VideoPlayer from 'react-native-true-sight'
+import Common from '../../Utils/Common'
 
 import Log from '../../Utils/Log'
 const log = new Log('CustomMessages/ChatVideo')
@@ -42,14 +43,24 @@ export default class Video extends Component {
 
   componentWillMount () {
     const {source} = this.props
+
     // Check if it's a local or remote/web file
     // if it's a web url...
     let urlPattern = /^https?:\/\//i
     if (urlPattern.test(source)) {
-      // ...set the source instantly
-      this.setState({source})
+      // ...check if there is a cached version of the video
+      const cacheManager = Common.getImageCacheManager()
+      cacheManager.queryUrl(source).then(result => {
+        // if the video url isn't cached, just use the url as source
+        if (result === null) {
+          this.setState({source})
+        // if there is a cached version, use to local file!
+        } else {
+          this.setState({source: result})
+        }
+      })
     } else {
-      // if it's a local file, check if there is a file filepath exists...
+      // if it's a local file, check if the filepath exists...
       RNFS.exists(source)
       .then((exists) => {
         if (exists) {
@@ -70,8 +81,8 @@ export default class Video extends Component {
                 // then open the PDF
                 this.setState({source: dest})
               })
-              .catch((error) => {
-                log.warn('Could not uncompress video from local android assets.', error)
+              .catch((err) => {
+                log.warn('Could not uncompress video from local android assets: ' + err.toString())
               })
           }
         }
@@ -129,6 +140,12 @@ export default class Video extends Component {
           middleControlsBarProps={controlProps}
         />
       )
-    } else return <ActivityIndicator style={{width: 120, height: 60, color: '#fff'}} />
+    } else {
+      return (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <ActivityIndicator color={Colors.activityIndicator} />
+        </View>
+      )
+    }
   }
 }

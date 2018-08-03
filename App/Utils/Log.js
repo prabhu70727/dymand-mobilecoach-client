@@ -200,11 +200,15 @@ export default class Log {
             break
           case 'other':
             try {
-              const messageToDisplay = JSON.stringify(message)
-              if (messageToDisplay === undefined) {
-                messagePart = '[Other] ' + message.toString()
+              if (typeof message === 'undefined') {
+                messagePart = '[undefined]'
               } else {
-                messagePart = '[Other] ' + messageToDisplay
+                const messageToDisplay = JSON.stringify(message)
+                if (messageToDisplay === undefined) {
+                  messagePart = '[Other] ' + message.toString()
+                } else {
+                  messagePart = '[Other] ' + messageToDisplay
+                }
               }
             } catch (error) {
               if (message !== undefined && message !== null && (message.toString !== undefined || message.toString !== null)) {

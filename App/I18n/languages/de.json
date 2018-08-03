@@ -1,16 +1,19 @@
- {
-   "Onboarding": {
-       "title":"MobileCoach Client",
-       "subtitle": "...",
-       "next": "Weiter",
-       "chooseLanguage": "Bitte wähle deine bevorzugte Sprache",
-       "chooseCoach": "Suche dir einen Guide aus",
-       "welcome": "Herzlich willkommen bei ...",
-       "start": "Los geht's"
-   },
+{
+  "Onboarding": {
+    "title": "MobileCoach Client",
+    "subtitle": "...",
+    "next": "Weiter",
+    "chooseLanguage": "Bitte wähle deine bevorzugte Sprache",
+    "chooseCoach": "Suche dir einen Guide aus",
+    "welcome": "Herzlich willkommen bei ...",
+    "start": "Los geht's",
+    "checkQrUsageSubtitle": "Hast du einen OR-Code, wie oben abgebildet erhalten, um diese App zu nutzen?",
+    "qrAvailable": "Ja, ich habe einen QR-Code",
+    "qrNotAvailable": "Nein, ich habe keinen QR-Code"
+  },
   "Coaches": {
-      "0":"Lukas",
-      "1":"Anna"
+    "0": "Lukas",
+    "1": "Anna"
   },
   "Chat": {
     "title": "Chat mit {{coach}}",
@@ -165,47 +168,47 @@
     "134": "Portion (Mini-Pack)"
   },
   "FoodCategories": {
-    "50": "Apéro/Vorspeisen",
-    "21": "Brot & Backwaren",
-    "55": "Brotaufstriche süss & würzig",
-    "23": "Cerealien/Müesli",
-    "30": "Desserts/Süssspeisen",
-    "52": "Dressings",
-    "42": "Eiprodukte",
-    "3": "Feinbackwaren/Patisserie",
-    "7": "Fette & Öle",
-    "8": "Fische",
-    "10": "Fleisch",
-    "12": "Fleischersatzprodukte (Veggie-Produkte)",
-    "11": "Fleischprodukte & Wurstwaren",
-    "49": "Flocken & Körner",
-    "13": "Früchte",
-    "17": "Gemüse",
     "1": "Getränke, alkoholfrei",
     "2": "Getränke, alkoholhaltig",
-    "58": "Getränkepulver",
+    "3": "Feinbackwaren/Patisserie",
+    "4": "Süsswaren",
+    "7": "Fette & Öle",
+    "8": "Fische",
+    "9": "Meeresfrüchte",
+    "10": "Fleisch",
+    "11": "Fleischprodukte & Wurstwaren",
+    "12": "Fleischersatzprodukte (Veggie-Produkte)",
+    "13": "Früchte",
+    "15": "Kerne & Samen",
+    "16": "Nüsse",
+    "17": "Gemüse",
+    "18": "Salate",
+    "19": "Pilze",
+    "21": "Brot & Backwaren",
     "22": "Getreide-Stärkebeilagen",
-    "32": "Hauptgerichte",
+    "23": "Cerealien/Müesli",
     "26": "Hülsenfrüchte",
     "28": "Kartoffelähnliche Wurzeln",
-    "44": "Kartoffelprodukte",
-    "15": "Kerne & Samen",
-    "9": "Meeresfrüchte",
+    "30": "Desserts/Süssspeisen",
     "31": "Milchersatzprodukte",
-    "38": "Milchprodukte (Kuh, Schaf, Ziege)",
-    "16": "Nüsse",
-    "19": "Pilze",
-    "41": "Pizzas",
-    "18": "Salate",
-    "36": "Salate, angemacht",
-    "40": "Salzige Snacks",
-    "45": "Sandwiches",
-    "53": "Saucen",
+    "32": "Hauptgerichte",
     "34": "Schnell-/Fertiggerichte",
-    "57": "Süssungsmittel",
-    "4": "Süsswaren",
+    "36": "Salate, angemacht",
+    "38": "Milchprodukte (Kuh, Schaf, Ziege)",
+    "40": "Salzige Snacks",
+    "41": "Pizzas",
+    "42": "Eiprodukte",
+    "44": "Kartoffelprodukte",
+    "45": "Sandwiches",
+    "49": "Flocken & Körner",
+    "50": "Apéro/Vorspeisen",
     "51": "Suppen & Bouillons",
+    "52": "Dressings",
+    "53": "Saucen",
     "54": "Würzsaucen & Dips",
+    "55": "Brotaufstriche süss & würzig",
+    "57": "Süssungsmittel",
+    "58": "Getränkepulver",
     "21info": "Süsse und salzige Kuchen/Wähen findest Du unter den Hauptgerichten. Alles andere aus der Backstube unter Feinbackwaren/Patisserie.",
     "3info": "Hier findest Du verschiedene Produkte aus der Backstube, Guetzli, Hefegebäck, aber auch Cakes, Torten usw.",
     "32info": "Hier findest Du fertige Speisen oder Gerichte, bei denen verschiedene Komponenten gemischt sind, wie z.B. Aufläufe usw. Für Pizzas, Sandwiches und angemachte Salate gibt es eine extra Gruppe.",
@@ -237,12 +240,12 @@
     "HOME": "Zuhause",
     "EAT_OUT": "Auswärts",
     "EAT_OUT_OPTIONS": {
-        "TAKE_AWAY": "Take-away",
-        "FAST_FOOD": "Fast Food Restaurant",
-        "RESTAURANT": "Restaurant, Café",
-        "WORK_RESTAURANT": "Personalrestaurant, Mensa",
-        "FRIENDS": "Auswärts bei Freunden, Familie",
-        "MISC": "Sonstiges"
+      "TAKE_AWAY": "Take-away",
+      "FAST_FOOD": "Fast Food Restaurant",
+      "RESTAURANT": "Restaurant, Café",
+      "WORK_RESTAURANT": "Personalrestaurant, Mensa",
+      "FRIENDS": "Auswärts bei Freunden, Familie",
+      "MISC": "Sonstiges"
     },
     "manual": "Tagebuch-Anleitung",
     "recentlyAdded": "Kürzlich hinzugefügt",
@@ -306,9 +309,9 @@
       "labels": "Kennzeichnung",
       "preparation": "Zubereitung",
       "storage": "Aufbewahrung",
-      "balanced-diet":"Ausgewogen und nachhaltig",
+      "balanced-diet": "Ausgewogen und nachhaltig",
       "add-topics": "Zusätzliche Themen",
-      "tour-end":"Tour Ende"
+      "tour-end": "Tour Ende"
     }
   },
   "Settings": {
@@ -354,12 +357,13 @@
     "Backpack": "Bibliothek",
     "Diary": "Tagebuch",
     "Settings": "Einstellungen",
-    "Recipes": "Rezepte",
+    "Recipes": "Rezepte"
   },
   "Common": {
-    "confirm": "Bestätigen",
     "abort": "Abbrechen",
     "answerExpired": "Antwortzeit abgelaufen",
+    "backButton": "Zweimal drücken zum Beenden der App",
+    "confirm": "Bestätigen",
     "invalid": "Ungültiger Wert",
     "validationError": "Bitte trage einen gültigen Wert ein.",
     "ok": "OK",
@@ -373,6 +377,9 @@
     "datePicker": {
       "outOfRange": "Bitte wählen Sie einen Zeitpunkt zwischen"
     },
-    "backButton": "Zweimal drücken zum Beenden der App"
+    "recordAudio": "Aufnahme starten",
+    "retry": "Wiederholen",
+    "takePhoto": "Foto aufnehmen",
+    "recordVideo": "Video aufnehmen"
   }
- }
+}

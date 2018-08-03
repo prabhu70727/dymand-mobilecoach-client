@@ -10,5 +10,9 @@ export const inputMessageStyles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 8,
     marginLeft: 50
+  },
+  mediaContent: {
+    margin: 5,
+    borderRadius: 13
   }
 })

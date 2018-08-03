@@ -34,6 +34,7 @@ export default class Ticks extends Component {
     const { currentMessage } = this.props
     switch (currentMessage.custom.clientStatus) {
       case MessageStates.PREPARED_FOR_SENDING:
+      case MessageStates.UPLOADING_MEDIA_CONTENT:
         return <Icon name='clock' type='material-community' color={Colors.messageBubbles.ticks.unread} size={12} />
       case MessageStates.SENT:
         return <Icon name='check' type='material-community' color={Colors.messageBubbles.ticks.unread} size={12} />

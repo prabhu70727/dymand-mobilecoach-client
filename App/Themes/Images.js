@@ -12,7 +12,8 @@ const images = {
   custom: {
     pyramidBg: require('../Images/FoodPyramid/pyramid_bg.png'),
     pyramidFood: require('../Images/FoodPyramid/pyramid_food.png')
-  }
+  },
+  welcomeQr: require('./../Images/Onboarding/welcomeQR.png')
 }
 
 export default images

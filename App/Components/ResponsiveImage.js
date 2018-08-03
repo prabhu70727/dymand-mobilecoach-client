@@ -3,7 +3,7 @@ import { Image, View, ViewPropTypes, ActivityIndicator } from 'react-native'
 import resolveAssetSource from 'resolveAssetSource'
 import PropTypes from 'prop-types'
 import _ from 'lodash'
-import {ImageCacheManager} from 'react-native-cached-image'
+import Common from '../Utils/Common'
 
 import Log from '../Utils/Log'
 const log = new Log('Components/ResponsiveImage')
@@ -20,7 +20,7 @@ export default class ResponsiveImage extends Component {
     onDimensionsChanged: PropTypes.func,
     // Tries to cache remote files if this flag is set. Ignored for local files.
     cached: PropTypes.bool,
-    activityIndicatorProps: PropTypes.object
+    activityIndicatorColor: PropTypes.string
   }
 
   constructor (props) {
@@ -29,7 +29,8 @@ export default class ResponsiveImage extends Component {
       height: 0,
       width: 0,
       isCacheable: true,
-      cachedImagePath: null
+      cachedImagePath: null,
+      imageLoaded: false
     }
   }
 
@@ -57,7 +58,7 @@ export default class ResponsiveImage extends Component {
     const {source, cached} = this.props
     // get size of network image
     if (source.uri) {
-      if (cached) {
+      if (cached && source.uri.startsWith('http')) {
         this.processSourceCaching(source)
       } else {
         Image.getSize(source.uri, (width, height) => {
@@ -73,8 +74,7 @@ export default class ResponsiveImage extends Component {
 
   processSourceCaching (source) {
     const url = _.get(source, ['uri'], null)
-    const imageCacheManager = this.getImageCacheManager()
-
+    const imageCacheManager = Common.getImageCacheManager()
     imageCacheManager.downloadAndCacheUrl(url)
       .then(cachedImagePath => {
         this.setState({
@@ -98,14 +98,6 @@ export default class ResponsiveImage extends Component {
       // if a new source is passed, process & cache it
       this.processSource(nextProps.source)
     }
-  }
-
-  getImageCacheManager () {
-    // try to get ImageCacheManager from context
-    if (this.context && this.context.getImageCacheManager) {
-      return this.context.getImageCacheManager()
-    }
-    return ImageCacheManager()
   }
 
   updateDimensions (width, height) {
@@ -135,37 +127,64 @@ export default class ResponsiveImage extends Component {
               height: null,
               aspectRatio: this.state.width / this.state.height}}
             source={source}
+            onLoad={() => this.setState({imageLoaded: true})}
           />
         </View>
       )
     } else {
       return (
-        <Image resizeMode='contain' source={source} style={[this.props.imageStyle, (this.state.height && this.state.width) ? {height: this.state.height * this.props.scale, width: this.state.width * this.props.scale} : null, this.props.activeImageStyle]} />
+        <Image onLoad={() => this.setState({imageLoaded: true})} resizeMode='contain' source={source} style={[this.props.imageStyle, (this.state.height && this.state.width) ? {height: this.state.height * this.props.scale, width: this.state.width * this.props.scale} : null, this.props.activeImageStyle]} />
       )
     }
   }
 
-  render () {
+  renderContent () {
     const {cached} = this.props
-    if (!cached || !this.props.source.uri) return this.renderImage(this.props.source)
+    // Just render Image immediately for the following cases:
+    // 1. 'cached' flag is set to false
+    // 2. source doesn't have an 'uri' prop => image-asset source already, no url given (e.g. required static image source)
+    // 3. source has a uri, but doesn't start with 'http' => local file uri!
+    if (!cached || !this.props.source.uri || !this.props.source.uri.startsWith('http')) return this.renderImage(this.props.source)
+    // ...else, if image source is remove source:
     else {
-      if (this.state.isCacheable && !this.state.cachedImagePath) {
-        return this.renderLoader()
-      }
+      // check if source is cachable
+      if (this.state.isCacheable) {
+        // ...if cachable, but there is no cachedImagePath, just show loader
+        if (!this.state.cachedImagePath || this.state.cachedImagePath === null) {
+          return null
+        // else use cachedImagePath...
+        } else {
+          const source = { uri: 'file://' + this.state.cachedImagePath }
+          return this.renderImage(source)
+        }
       // Fallback, if source isn't cachable, use the source given in props
-      const source = (this.state.isCacheable && this.state.cachedImagePath) ? {
-        uri: 'file://' + this.state.cachedImagePath
-      } : this.props.source
-      return this.renderImage(source)
+      } else {
+        const {source} = this.props
+        return this.renderImage(source)
+      }
     }
   }
 
-  renderLoader () {
-    const {activityIndicatorProps} = this.props
+  render () {
+    const {activityIndicatorColor} = this.props
     return (
-      <ActivityIndicator
-        {...activityIndicatorProps}
-      />
+      <View>
+        {this.renderContent()}
+        {!this.state.imageLoaded
+          ? <ActivityIndicator
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              right: 0,
+              bottom: 0,
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+            color={activityIndicatorColor}
+          /> : null
+        }
+      </View>
     )
   }
 }

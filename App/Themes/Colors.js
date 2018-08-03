@@ -42,11 +42,15 @@ const colors = {
   messageBubbles: {
     left: {
       background: Brand.colors.background1,
-      text: Brand.colors.text1
+      text: Brand.colors.text1,
+      activityIndicator: Brand.colors.text1,
+      progressIndicator: Brand.colors.text1
     },
     right: {
       background: Brand.colors.background2,
-      text: Brand.colors.text2
+      text: Brand.colors.text2,
+      activityIndicator: Brand.colors.text2,
+      progressIndicator: Brand.colors.text2
     },
     system: {
       background: '#B5B5B5',
@@ -55,9 +59,9 @@ const colors = {
     ticks: {
       unread: Brand.colors.text2,
       read: Brand.colors.buttonBackground
-    },
-    activityIndicator: Brand.colors.primary
+    }
   },
+  activityIndicator: Brand.colors.primary,
   buttons: {
     common: {
       ...button
@@ -119,6 +123,9 @@ const colors = {
     thumb: button.text, // slider handle
     minTint: Brand.colors.buttonBackground, // slider background left
     maxTint: Brand.colors.grey1 // slider background right
+  },
+  playAudio: {
+    progressbarBackground: Brand.colors.buttonBackground
   },
   connectionIndicator: {
     neutralState: '#FFFFFF',

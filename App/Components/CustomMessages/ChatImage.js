@@ -1,17 +1,23 @@
 import React, { Component } from 'react'
 import { StyleSheet, TouchableOpacity } from 'react-native'
 import PropTypes from 'prop-types'
+import urlapi from 'url'
+
 import ResponsiveImage from '../ResponsiveImage'
 import {Metrics, Colors} from '../../Themes/'
+import AppConfig from '../../Config/AppConfig'
+import {inputMessageStyles} from './Styles/CommonStyles'
 
 export default class ChatImage extends Component {
   static propTypes = {
     source: PropTypes.string.isRequired,
-    showModal: PropTypes.func.isRequired
+    showModal: PropTypes.func.isRequired,
+    position: PropTypes.string.isRequired
   }
 
   render () {
     // TODO: Would be nice if we didn't need to compute the image width this way..
+    const {source, position} = this.props
     let imageWidth = Metrics.screenWidth - 135
     return (
       <TouchableOpacity
@@ -21,14 +27,24 @@ export default class ChatImage extends Component {
       >
         <ResponsiveImage
           cached
-          activityIndicatorProps={{color: Colors.messageBubbles.activityIndicator}}
-          imageStyle={styles.image}
-          // url-suffix parameters: /width/height/boolean watermark/boolean crop
-          source={{uri: this.props.source + '/500/500/false/false'}}
+          activityIndicatorColor={Colors.messageBubbles[position].activityIndicator}
+          imageStyle={inputMessageStyles.mediaContent}
+          source={{uri: this.getSourcePath(source)}}
           width={imageWidth}
         />
       </TouchableOpacity>
     )
+  }
+
+  getSourcePath (source) {
+    // Use thumbnail service for images from own servers
+    const { useLocalServer, localMediaURL, remoteMediaURL } = AppConfig.config.serverSync
+
+    const hostname = urlapi.parse(useLocalServer ? localMediaURL : remoteMediaURL).hostname
+
+    if (source.includes(hostname + '/')) {
+      return source + '/500/500/false/false'
+    } else return source
   }
 }
 

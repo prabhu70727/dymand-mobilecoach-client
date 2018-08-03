@@ -76,7 +76,7 @@ export default class EmptyChatIndicator extends Component {
     // else return an activity indicator
     } else {
       return (
-        <LoadingOverlay type='Bounce' color={Colors.messageBubbles.activityIndicator} size={60} backgroundOpacity={0} />
+        <LoadingOverlay type='Bounce' color={Colors.activityIndicator} size={60} backgroundOpacity={0} />
       )
     }
   }

@@ -106,7 +106,7 @@ def enableProguardInReleaseBuilds = false
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         applicationId "org.c4dhi.mobilecoach.client"
@@ -164,6 +164,7 @@ android {
 
 dependencies {
     compile fileTree(dir: "libs", include: ["*.jar"])
+    compile project(':react-native-image-resizer')
     compile project(':react-native-exit-app')
     compile project(':react-native-sensitive-info')
     compile project(':react-native-video')
@@ -181,6 +182,13 @@ dependencies {
     compile project(':react-native-i18n')
     compile project(':react-native-device-info')
     compile project(':react-native-config')
+    compile project(':react-native-camera')
+    compile project(':react-native-audio')
+    compile project(':react-native-sound')
+
+    compile ("com.android.support:support-v4:27.0.1") {
+        force = true //<-- force dependency resolution to 27.0.1 in this case
+    }
 
     compile "com.android.support:appcompat-v7:23.0.1"
     compile ("com.facebook.react:react-native:0.52.0") { force = true }

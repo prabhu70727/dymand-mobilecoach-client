@@ -7,6 +7,8 @@ import WebRichContent from '../Components/WebRichContent'
 import WebViewContent from '../Components/WebViewContent'
 import Lightbox from '../Components/Lightbox'
 import FullscreenVideo from '../Components/Video/FullscreenVideo'
+import CameraComponent from './../Components/CameraComponent'
+import RecordAudioComponent from './../Components/RecordAudioComponent'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import * as Animatable from 'react-native-animatable'
@@ -130,6 +132,39 @@ class ModalContent extends Component {
           }}
           onClose={this.props.onClose}
               />)
+      case 'take-photo':
+        return (
+          <CameraComponent
+            usage='photo'
+            onBack={this.props.onClose}
+            title='Kamera'
+            onSubmitMedia={this.props.content.onSubmitMedia}
+          />
+        )
+      case 'record-video':
+        return (
+          <CameraComponent
+            usage='video'
+            onBack={this.props.onClose}
+            title='Video'
+            onSubmitMedia={this.props.content.onSubmitMedia}
+          />
+        )
+      case 'scan-qr':
+        return (
+          <CameraComponent
+            usage='qr'
+            onBack={this.props.onClose}
+            title='Read Qr-Code'
+          />
+        )
+      case 'record-audio':
+        return (
+          <RecordAudioComponent
+            onClose={this.props.onClose}
+            onSubmitMedia={this.props.content.onSubmitMedia}
+          />
+        )
       default: return null
     }
   }

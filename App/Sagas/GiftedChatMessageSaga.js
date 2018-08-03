@@ -21,7 +21,6 @@ const allMessages = (state) => state.messages
 let addedHistoricalMessages = []
 // const getNumberOfMessages = (state) => Object.keys(state.messages).length
 // const getNumberOfShownMessages = state => state.guistate.numberOfShownMessages
-
 export function * initializeGiftedChat ({buffer, newOrUpdatedMessagesChannel}, action) {
   log.info('Initializing gifted chat...')
   yield call(loadEarlierMessages)
@@ -433,13 +432,14 @@ function convertServerMessageToGiftedChatMessages (serverMessage, fakeTimestamp 
             content,
             // Component to be opened on Tap
             component: 'rich-text',
+            infoId: parsedCommand.value,
             buttonTitle: buttonTitle
           }
           // Only remember backpack infos
           if (parsedCommand.command === 'show-backpack-info') {
             if (parsedCommand.value === null) log.warn('Received show-backpack-info without id! Command: ' + serverMessage['server-message'])
             else {
-              // Add a seperate message to execute addInfoCommand
+              // Add a separate message to execute addInfoCommand
               let addInfoCommandMessage = R.clone(message)
               // No need to double store content because it will be loaded from serverMessage using the related-id
               addInfoCommandMessage.content = ''
@@ -536,6 +536,7 @@ function convertServerMessageToGiftedChatMessages (serverMessage, fakeTimestamp 
         clientVersion: serverMessage['client-version'],
         clientStatus: serverMessage['client-status'],
         sticky: serverMessage['sticky'],
+        uploadPath: serverMessage['media-upload-path'],
         visible: true,
         unanswered: false
       }
@@ -678,6 +679,21 @@ function convertServerMessageToGiftedChatMessages (serverMessage, fakeTimestamp 
             options: defaultOptions
           }
           break
+        }
+        case 'image':
+        case 'audio':
+        case 'video': {
+          inputMessage.type = type
+          if (options) {
+            for (let j = 0; j < options.length; j++) {
+              if (options[j][0] === 'variable') {
+                inputMessage.custom = {
+                  ...inputMessage.custom,
+                  uploadVariable: options[j][1]
+                }
+              }
+            }
+          }
         }
       }
       messages.push(inputMessage)

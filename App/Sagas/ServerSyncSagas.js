@@ -2,6 +2,7 @@ import { NetInfo, Platform } from 'react-native'
 import { call, select, put, take } from 'redux-saga/effects'
 import { delay } from 'redux-saga'
 import createDeepstream from 'deepstream.io-client-js'
+import axios from 'axios'
 
 import Common from '../Utils/Common'
 import AppConfig from '../Config/AppConfig'
@@ -34,10 +35,14 @@ let listenersRegistered = false
 let inSync = false
 
 let serverSyncUser = null
+let restUser = null
+let restToken = null
 
 let connectionStateChannel = null
 let incomingMessageChannel = null
 let outgoingMessageChannel = null
+
+const wait = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
 
 /* --- Set channels from outside --- */
 export function setChannels (newConnectionStateChannel, newIncomingMessageChannel, newOutgoingMessageChannel) {
@@ -97,6 +102,7 @@ export function * initializeServerSync (action) {
   if (settings.registered === true) {
     log.debug('User already registered.')
     serverSyncUser = settings.deepstreamUser
+    restUser = settings.restUser
     PushNotifications.getInstance().setEncryptionKey(('ds:' + serverSyncUser).substring(0, 16), serverSyncUser.substring(serverSyncUser.length - 16))
     log.setUser(serverSyncUser)
   } else {
@@ -221,10 +227,19 @@ function * handleOutgoingMessage (action) {
       method = 'user-message'
       messageObject = {
         'user': serverSyncUser,
-        'user-message': message['user-value'] !== undefined ? message['user-value'] : '',
+        'user-message': (message['user-value'] !== undefined) ? message['user-value'] : '',
         'user-timestamp': message['user-timestamp'],
         'client-id': 'c-' + message['user-timestamp']
       }
+
+      // Optional fields
+      if (message['related-message-id'] !== undefined) {
+        messageObject['related-message-id'] = message['related-message-id'].substring(2)
+      }
+      if (message['user-message'] !== undefined) {
+        messageObject['user-text'] = message['user-message']
+      }
+
       break
     case MessageTypes.INTENTION:
       method = 'user-intention'
@@ -233,6 +248,14 @@ function * handleOutgoingMessage (action) {
         'user-intention': message['user-intention'],
         'user-timestamp': message['user-timestamp'],
         'client-id': 'c-' + message['user-timestamp']
+      }
+
+      // Optional fields
+      if (message['user-message'] !== undefined) {
+        messageObject['user-text'] = message['user-message']
+      }
+      if (message['user-content'] !== undefined) {
+        messageObject['user-content'] = message['user-content']
       }
       break
     case MessageTypes.VARIABLE:
@@ -243,22 +266,6 @@ function * handleOutgoingMessage (action) {
         'value': message['value']
       }
       break
-  }
-
-  // Add optional message fields if necessary
-  if (message['type'] === MessageTypes.PLAIN) {
-    if (message['related-message-id'] !== undefined) {
-      messageObject['related-message-id'] = message['related-message-id'].substring(2)
-    }
-  }
-  // Add optional intention fields if necessary
-  if (message['type'] === MessageTypes.INTENTION) {
-    if (message['user-message'] !== null) {
-      messageObject['user-message'] = message['user-message']
-    }
-    if (message['user-content'] !== null) {
-      messageObject['user-content'] = message['user-content']
-    }
   }
 
   try {
@@ -305,6 +312,7 @@ function * reactBasedOnConnectionState (action) {
         yield put({type: ServerSyncActions.REMEMBER_REGISTRATION, deepstreamUser, deepstreamSecret})
 
         serverSyncUser = deepstreamUser
+        restUser = 'ds:' + deepstreamUser
         PushNotifications.getInstance().setEncryptionKey(('ds:' + serverSyncUser).substring(0, 16), serverSyncUser.substring(serverSyncUser.length - 16))
         log.setUser(serverSyncUser)
         settings = yield select(selectServerSyncSettings)
@@ -675,4 +683,89 @@ function * checkServerPushNotificationRegistration () {
   } while (!settings.pushShared)
 
   log.debug('Push token registration finished for client and server')
+}
+
+async function retrieveRestToken (forceRenew) {
+  log.debug('Retrieve REST token...')
+  if (!forceRenew && restToken !== null) {
+    log.debug('Using existing token:', restToken)
+    return restToken
+  }
+
+  try {
+    const result = await rpcPromise('rest-token', {
+      'user': serverSyncUser
+    }, true)
+    if (result !== undefined && result !== null) {
+      log.debug('Retrieval of REST token successful:', result)
+      restToken = result
+      return result
+    } else {
+      log.warn('Error at retrieving REST token. Result is:', result)
+    }
+  } catch (error) {
+    log.warn('Error at retrieving REST token.')
+  }
+
+  return null
+}
+
+export async function uploadMediaInput (mediaType, variable, file, successCallback, progressCallback, errorCallback, forceNewToken = false) {
+  log.debug('Performing upload of', mediaType, 'from file', file, 'to variable', variable)
+
+  progressCallback(0)
+
+  let token
+  let renew = forceNewToken
+  while ((token = await retrieveRestToken(renew)) === null) {
+    renew = true
+    await wait(2000)
+  }
+
+  let mediaReference = null
+  try {
+    log.debug('Performing upload with token', token)
+
+    const { useLocalServer, localRestURL, remoteRestURL } = serverSyncConfig
+    const restURL = useLocalServer ? localRestURL : remoteRestURL
+
+    const config = {
+      baseURL: restURL,
+      headers: {'user': restUser, 'token': restToken, 'Content-Type': 'multipart/form-data'},
+      contentType: false,
+      onUploadProgress: function (progressEvent) {
+        progressCallback(Math.floor((progressEvent.loaded * 100) / progressEvent.total))
+      }
+    }
+
+    const formData = new FormData()
+    formData.append('file', {uri: file, name: file.substring(file.lastIndexOf('/') + 1)})
+
+    const response = await axios.post('media/upload/' + mediaType.toUpperCase() + '/' + variable, formData, config)
+
+    if (response.status === 200) {
+      progressCallback(100)
+      log.debug('Upload successful')
+      mediaReference = response.data.mediaReference
+    } else {
+      log.debug('Upload not successful:', response)
+    }
+  } catch (exception) {
+    if (typeof exception.response !== 'undefined' && typeof exception.response.status !== 'undefined' && exception.response.status === 401) {
+      log.debug('Upload failed due to outtimed token', exception)
+
+      log.debug('Retrying upload')
+      uploadMediaInput(mediaType, variable, file, successCallback, progressCallback, errorCallback, true)
+      return
+    } else {
+      log.debug('Upload failed:', exception)
+    }
+  }
+
+  if (mediaReference !== null) {
+    const { useLocalServer, localMediaURL, remoteMediaURL } = serverSyncConfig
+    successCallback((useLocalServer ? localMediaURL : remoteMediaURL) + mediaReference)
+  } else {
+    errorCallback()
+  }
 }

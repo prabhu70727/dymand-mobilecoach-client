@@ -9,7 +9,9 @@ import SettingsActions from '../../Redux/SettingsRedux'
 import { Colors } from '../../Themes/'
 
 // Adjust to the appropriate next screen
-const nextScreen = 'ScreenCoachSelection' // 'ScreenScreeningSurvey'
+// const nextScreen = 'ScreenScreeningSurvey'
+// const nextScreen = 'ScreenAuthorizeUser'
+const nextScreen = 'ScreenCoachSelection'
 
 class ScreenLanguageSelection extends Component {
   render () {
@@ -68,9 +70,19 @@ export default connect(null, mapStateToDispatch)(ScreenLanguageSelection)
 const Styles = StyleSheet.create({
   container: {flex: 1, justifyContent: 'center', backgroundColor: Colors.onboarding.background, ...ifIphoneX({ paddingTop: 40 })},
   containerMargin: {flex: 0.15},
-  buttonContainer: {marginHorizontal: 50, flex: 0.5, justifyContent: 'space-between'},
+  buttonContainer: {
+    marginHorizontal: 30,
+    flex: 0.5,
+    justifyContent: 'space-between',
+    alignSelf: 'stretch'
+  },
   image: {flex: 1, alignSelf: 'stretch', resizeMode: 'contain'},
-  textContainer: {flex: 0.35, justifyContent: 'center'},
+  textContainer: {
+    flex: 0.35,
+    justifyContent: 'center',
+    alignSelf: 'stretch',
+    marginHorizontal: 30
+  },
   subtitle: {
     color: Colors.onboarding.text,
     textAlign: 'center',

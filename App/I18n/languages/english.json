@@ -1,15 +1,18 @@
 {
   "Onboarding": {
-      "title":"MobileCoach Client",
-      "subtitle": "...",
-      "next": "Weiter",
-      "chooseLanguage": "Bitte wähle deine bevorzugte Sprache",
-      "chooseCoach": "Suche dir einen Guide aus",
-      "welcome": "Herzlich willkommen bei ...",
-      "start": "Los geht's"
+    "title": "MobileCoach Client",
+    "subtitle": "...",
+    "next": "Weiter",
+    "chooseLanguage": "Bitte wähle deine bevorzugte Sprache",
+    "chooseCoach": "Suche dir einen Guide aus",
+    "welcome": "Herzlich willkommen bei ...",
+    "start": "Los geht's",
+    "checkQrUsageSubtitle": "Hast du einen OR-Code, wie oben abgebildet erhalten, um diese App zu nutzen?",
+    "qrAvailable": "Ja, ich habe einen QR-Code",
+    "qrNotAvailable": "Nein, ich habe keinen QR-Code"
   },
   "Coaches": {
-      "0":"Lukas",
-      "1":"Anna"
+    "0": "Lukas",
+    "1": "Anna"
   }
 }

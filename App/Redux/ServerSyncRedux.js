@@ -31,7 +31,6 @@ export const SETTINGS_INITIAL_STATE = Immutable({
   deepstreamUser: null,
   deepstreamSecret: null,
   restUser: null, // Must be "ds:"+user
-  restToken: null,
   pushPlatform: null,
   pushToken: null,
   pushRequested: false,

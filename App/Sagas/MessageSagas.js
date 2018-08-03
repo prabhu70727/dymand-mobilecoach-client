@@ -1,4 +1,4 @@
-import { select, put, call, take } from 'redux-saga/effects'
+import { select, put, take } from 'redux-saga/effects'
 import { channel, buffers } from 'redux-saga'
 
 import { MessageActions, MessageStates } from '../Redux/MessageRedux'
@@ -17,10 +17,10 @@ export function * sendMessage (action) {
   log.info('Send message...')
   log.action('Dialog', 'SendMessage', 'Timestamp', new Date())
 
-  const { text, value, relatedMessageId } = action
+  const { text, value, relatedMessageId, containsMedia } = action
   let messages = yield select(selectMessages)
 
-  const message = yield call(createMessage, text, value, relatedMessageId, null, null, MessageTypes.PLAIN, false, messages)
+  const message = createMessage(text, value, relatedMessageId, null, null, MessageTypes.PLAIN, false, messages, containsMedia)
 
   let relatedMessage = messages[relatedMessageId]
 
@@ -42,7 +42,7 @@ export function * sendInvisibleMessage (action) {
   const { value, relatedMessageId } = action
   let messages = yield select(selectMessages)
 
-  const message = yield call(createMessage, null, value, relatedMessageId, null, null, MessageTypes.PLAIN, true, messages)
+  const message = createMessage(null, value, relatedMessageId, null, null, MessageTypes.PLAIN, true, messages)
 
   let relatedMessage = messages[relatedMessageId]
 
@@ -65,11 +65,11 @@ export function * sendIntention (action) {
   const messages = yield select(selectMessages)
 
   let invisible = true
-  if (text != null) {
+  if (text !== null) {
     invisible = false
   }
 
-  const message = yield call(createMessage, text, null, null, intention, (typeof content === 'string') ? content : JSON.stringify(content), MessageTypes.INTENTION, invisible, messages)
+  const message = createMessage(text, null, null, intention, (typeof content === 'string') ? content : JSON.stringify(content), MessageTypes.INTENTION, invisible, messages)
 
   yield put({type: MessageActions.ADD_OR_UPDATE_MESSAGE, message, status: MessageStates.PREPARED_FOR_SENDING})
 }
@@ -82,7 +82,7 @@ export function * sendVariableValue (action) {
   const { variable, value } = action
   const messages = yield select(selectMessages)
 
-  const message = yield call(createMessage, variable, value, null, null, null, MessageTypes.VARIABLE, true, messages)
+  const message = createMessage(variable, value, null, null, null, MessageTypes.VARIABLE, true, messages)
 
   yield put({type: MessageActions.ADD_OR_UPDATE_MESSAGE, message, status: MessageStates.PREPARED_FOR_SENDING})
 }
@@ -132,44 +132,53 @@ export function * watchMessageUpdateChannel () {
 }
 
 /* --- Create a client created message in redux --- */
-function createMessage (text, value, relatedMessageId, intention, content, type, invisible, messages) {
+function createMessage (text, value, relatedMessageId, intention, content, type, invisible, messages, containsMedia = false) {
   // Create message
   let message = {}
-
   switch (type) {
     case MessageTypes.PLAIN:
+      message['type'] = MessageTypes.PLAIN
+
       message['user-message'] = text
+
+      // Optional fields
       if (value !== undefined && value !== null) {
         message['user-value'] = value
       }
-      message['type'] = MessageTypes.PLAIN
+      if (relatedMessageId !== null) {
+        message['related-message-id'] = relatedMessageId
+      }
+      if (containsMedia) {
+        let mediaType = 'image'
+        const fileExtension = containsMedia.split('.').pop()
+        if (fileExtension === 'mp4' || fileExtension === 'mov' || fileExtension === 'm4v') mediaType = 'video'
+        if (fileExtension === 'aac') mediaType = 'audio'
+        message['contains-media'] = containsMedia
+        message['media-type'] = mediaType
+      }
+
       break
     case MessageTypes.INTENTION:
-      message['user-intention'] = intention
       message['type'] = MessageTypes.INTENTION
+
+      message['user-intention'] = intention
+
+      // Optional fields
+      if (text !== undefined && text !== null) {
+        message['user-message'] = text
+      }
+      if (content !== undefined && content !== null) {
+        message['user-content'] = content
+      }
+
       break
     case MessageTypes.VARIABLE:
+      message['type'] = MessageTypes.VARIABLE
+
       message['variable'] = text
       message['value'] = value
-      message['type'] = MessageTypes.VARIABLE
+
       break
-  }
-
-  // Add optional message fields if necessary
-  if (type === MessageTypes.PLAIN) {
-    if (relatedMessageId !== null) {
-      message['related-message-id'] = relatedMessageId
-    }
-  }
-
-  // Add optional intention fields if necessary
-  if (type === MessageTypes.INTENTION) {
-    if (text !== null) {
-      message['user-message'] = text
-    }
-    if (content !== null) {
-      message['user-content'] = content
-    }
   }
 
   // Set invisible if necessary
@@ -181,6 +190,5 @@ function createMessage (text, value, relatedMessageId, intention, content, type,
     messageClientTimestamp++
   }
   message['user-timestamp'] = messageClientTimestamp
-
   return message
 }

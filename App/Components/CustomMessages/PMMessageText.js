@@ -4,12 +4,14 @@ import {
   View,
   Text,
   ViewPropTypes,
-  Linking } from 'react-native'
+  Linking
+ } from 'react-native'
 import PropTypes from 'prop-types'
 import ParsedText from 'react-native-parsed-text'
 
 import ChatImage from './ChatImage'
 import ChatVideo from './ChatVideo'
+import PlayAudioFile from './PlayAudioFile'
 
 import Log from '../../Utils/Log'
 const log = new Log('CustomMessages/PMMessageText')
@@ -17,7 +19,7 @@ const log = new Log('CustomMessages/PMMessageText')
 const URL_PATTERN = /(https?:\/\/|www\.)[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/i
 const WWW_URL_PATTERN = /^www\./i
 const MARKDOWN_URL_PATTERN = /\[(.+?)\]\(.+?\)/i
-const CONTENT_TYPES = {IMAGE: 'image', VIDEO: 'video'}
+const CONTENT_TYPES = {IMAGE: 'image', VIDEO: 'video', AUDIO: 'audio'}
 
 export default class PMMessageText extends Component {
   static propTypes = {
@@ -131,6 +133,7 @@ export default class PMMessageText extends Component {
 
   renderMediaText (renderMedia = () => null) {
     const {text} = this.props.currentMessage
+    const {mediaType} = this.props.currentMessage.custom
     let subTexts = text.split('####LINKED_MEDIA_OBJECT####')
     return (
       subTexts.map((subText, index) => {
@@ -143,7 +146,7 @@ export default class PMMessageText extends Component {
           )
         } else {
           return (
-            <View key={index} style={{justifyContent: 'center', alignItems: 'center'}}>
+            <View key={index} style={mediaType !== 'audio' ? styles.mediaTextVisual : styles.mediaTextAudio}>
               {this.renderText(subText)}
               {renderMedia()}
             </View>
@@ -159,6 +162,7 @@ export default class PMMessageText extends Component {
       // Check if the message contains media
       if (currentMessage.custom.linkedMedia && currentMessage.text.includes('####LINKED_MEDIA_OBJECT####')) {
         // Check content-type of media and render accordingly
+        log.debug('Rendering media type', currentMessage.custom.mediaType)
         switch (currentMessage.custom.mediaType) {
           case CONTENT_TYPES.IMAGE:
             return (
@@ -172,9 +176,15 @@ export default class PMMessageText extends Component {
                 {this.renderMediaText(this.renderVideo)}
               </View>
             )
+          case CONTENT_TYPES.AUDIO:
+            return (
+              <View>
+                {this.renderMediaText(this.renderAudio)}
+              </View>
+            )
           // Fallback-Strategy: If there is a linked-Media-Object, but the contentType is unknown, just render the URL as a link-text.
           default:
-            log.warn('Unknown contentType', this.state.contentType, 'found for linkedMedia-url: ', currentMessage.custom.linkedMedia)
+            log.warn('Unknown contentType', currentMessage.custom.mediaType, 'found for linkedMedia-url: ', currentMessage.custom.linkedMedia)
             return (
               this.renderText(currentMessage.text.replace('####LINKED_MEDIA_OBJECT####', currentMessage.custom.linkedMedia))
             )
@@ -184,11 +194,28 @@ export default class PMMessageText extends Component {
   }
 
   renderImage = () => {
-    return <ChatImage source={this.props.currentMessage.custom.linkedMedia} showModal={(component, content, onClose) => this.props.showModal(component, content, onClose)} />
+    return <ChatImage
+      source={this.props.currentMessage.custom.linkedMedia}
+      showModal={(component, content, onClose) => this.props.showModal(component, content, onClose)}
+      position={this.props.position}
+    />
   }
 
   renderVideo = () => {
-    return <ChatVideo source={this.props.currentMessage.custom.linkedMedia} showModal={(component, content, onClose) => this.props.showModal(component, content, onClose)} />
+    return <ChatVideo
+      source={this.props.currentMessage.custom.linkedMedia}
+      showModal={(component, content, onClose) => this.props.showModal(component, content, onClose)}
+      position={this.props.position}
+    />
+  }
+
+  renderAudio = () => {
+    return (
+      <PlayAudioFile
+        source={this.props.currentMessage.custom.linkedMedia}
+        position={this.props.position}
+      />
+    )
   }
 }
 
@@ -221,5 +248,11 @@ const styles = {
     link: {
       textDecorationLine: 'underline'
     }
-  })
+  }),
+  mediaTextVisual: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  mediaTextAudio: {
+  }
 }

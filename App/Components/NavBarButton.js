@@ -6,9 +6,11 @@ import PropTypes from 'prop-types'
 export default class NavButton extends Component {
   render () {
     const {icon, onPress, position, iconStyle} = this.props
+
+    const containerStyle = this.props.containerStyle === undefined ? {} : this.props.containerStyle
     const style = position === 'left' ? { paddingLeft: 15, paddingRight: 10, paddingTop: 10, paddingBottom: 10 } : { paddingLeft: 10, paddingRight: 15, paddingTop: 10, paddingBottom: 10 }
     return (
-      <TouchableOpacity style={style} onPress={onPress}>
+      <TouchableOpacity style={[style, {...containerStyle}]} onPress={onPress}>
         <Icon name={icon} {...iconStyle} />
       </TouchableOpacity>
     )

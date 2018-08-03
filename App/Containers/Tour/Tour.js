@@ -176,9 +176,9 @@ for (const [key, val] of Object.entries(TOUR_STEPS)) {
 // TODO: Language switching
 let tourSourceFile = null
 if (Platform.OS === 'ios') {
-  tourSourceFile = 'Web/de/' + AppConfig.config.whitelabel.tourFile
+  tourSourceFile = 'Web/de/' + AppConfig.config[AppConfig.project].tourFile
 } else if (Platform.OS === 'android') {
-  tourSourceFile = 'web/de/' + AppConfig.config.whitelabel.tourFile
+  tourSourceFile = 'web/de/' + AppConfig.config[AppConfig.project].tourFile
 }
 
 class AnimatedTour extends Component {

@@ -23,6 +23,7 @@ import PMMessageText from '../../Components/CustomMessages/PMMessageText'
 import AddMealActionButton from '../AddMealModule/AddMealActionButton'
 import OpenComponent from '../../Components/CustomMessages/OpenComponent'
 import TextOrNumberInputBubble from '../../Components/CustomMessages/TextOrNumberInputBubble'
+import MediaInput from '../../Components/CustomMessages/MediaInput'
 import DateInput from '../../Components/CustomMessages/DateInput'
 import Likert from '../../Components/CustomMessages/Likert'
 import LikertSlider from '../../Components/CustomMessages/LikertSlider'
@@ -209,6 +210,9 @@ class Chat extends Component {
       case 'free-text':
       case 'free-numbers':
       case 'date-input':
+      case 'audio':
+      case 'image':
+      case 'video':
         return this.renderBlankBubble(props)
       default:
         return null
@@ -252,6 +256,10 @@ class Chat extends Component {
       case 'free-text':
       case 'free-numbers':
         return this.renderTextOrNumberInputBubble(props)
+      case 'image':
+      case 'audio':
+      case 'video':
+        return this.renderMediaInput(props)
       case 'date-input':
         return this.renderDateInput(props)
       default:
@@ -297,6 +305,20 @@ class Chat extends Component {
     return (
       <TextOrNumberInputBubble
         onSubmit={(intention, text, value, relatedMessageId) => this.answerAction(intention, text, value, relatedMessageId)}
+        currentMessage={props.currentMessage}
+        fadeInAnimation='fadeInRight'
+        duration={350}
+        setAnimationShown={(id) => this.props.markAnimationAsShown(id)}
+      />
+    )
+  }
+
+  renderMediaInput (props) {
+    return (
+      <MediaInput
+        {...props}
+        type={props.currentMessage.type}
+        onSubmit={(intention, text, value, relatedMessageId, containsMedia) => this.answerAction(intention, text, value, relatedMessageId, containsMedia)}
         currentMessage={props.currentMessage}
         fadeInAnimation='fadeInRight'
         duration={350}
@@ -371,6 +393,9 @@ class Chat extends Component {
     return <Ticks currentMessage={currentMessage} />
   }
 
+/*
+ * The Camera Button is just for Debugging
+ */
   renderNavigationbar (props) {
     const {coach, connectionState} = props
     let title = I18n.t('Chat.title', {coach: I18n.t('Coaches.' + coach)})
@@ -378,10 +403,13 @@ class Chat extends Component {
       <PMNavigationBar
         title={title}
         rightButton={
-          <ConnectionStateButton
-            onPress={() => { this.showConnectionStateMessage(connectionState) }}
-            connectionState={connectionState}
-            />}
+          <View>
+            <ConnectionStateButton
+              onPress={() => { this.showConnectionStateMessage(connectionState) }}
+              connectionState={connectionState}
+            />
+          </View>
+      }
         props={props} />
     )
   }
@@ -398,7 +426,7 @@ class Chat extends Component {
    *            (in most cases this will be to send a answer message to the server)
    * payload:   Object which contains any kind of data we might need from our original message object
    */
-  answerAction (intention, text, value, relatedMessageId) {
+  answerAction (intention, text, value, relatedMessageId, containsMedia = false) {
     switch (intention) {
       case 'answer-to-server-invisible': {
         // Send the textmessage to server
@@ -407,7 +435,7 @@ class Chat extends Component {
       }
       case 'answer-to-server-visible': {
         // Send the textmessage to server
-        this.props.sendMessageToServer(text, value, relatedMessageId)
+        this.props.sendMessageToServer(text, value, relatedMessageId, containsMedia)
         break
       }
       default: {
@@ -419,11 +447,18 @@ class Chat extends Component {
 
   notifyServer (component, currentMessage = null) {
     switch (component) {
+      case 'rich-text': {
+        if (currentMessage.custom.infoId) {
+          let intention = 'info-' + currentMessage.custom.infoId + '-closed'
+          this.props.sendIntention(null, intention, null)
+        } else log.warn('Cannot send info-openend-notification for message: ' + currentMessage.text + ', because "info-id" is undefined.')
+        break
+      }
       case 'backpack-info': {
         if (currentMessage.custom.content) {
           let intention = 'info-' + currentMessage.custom.content + '-closed'
           this.props.sendIntention(null, intention, null)
-        } else log.warn('Cannot send info-openend-notification for message: ' + currentMessage.text + ', because info-id is undefined.')
+        } else log.warn('Cannot send info-openend-notification for message: ' + currentMessage.text + ', because "content" is undefined.')
         break
       }
       case 'web-closed': {
@@ -524,6 +559,22 @@ class Chat extends Component {
       let value = !this.state.renderInputBar
       this.setState({renderInputBar: value})
     }
+  }
+
+  openModalCameraWindow () {
+    Alert.alert(
+      'Auswahl der Komponente',
+      '',
+      [
+        {text: 'Foto', onPress: () => this.showModal('take-photo')},
+        {text: 'Video', onPress: () => this.showModal('take-video')},
+        {text: 'Scan QR', onPress: () => this.showModal('scan-qr')}
+      ]
+    )
+  }
+
+  openModalRecordAudioWindow () {
+    this.showModal('record-audio')
   }
 
   showConnectionStateMessage=(connectionState) => {
@@ -648,7 +699,7 @@ const mapStateToProps = (state) => {
 
 // TODO: Do we still need messageAnsweredByGiftedChat?
 const mapStateToDispatch = dispatch => ({
-  sendMessageToServer: (text, value, relatedMessageId = null) => dispatch(ServerMessageActions.sendMessage(text, value, relatedMessageId)),
+  sendMessageToServer: (text, value, relatedMessageId = null, containsMedia) => dispatch(ServerMessageActions.sendMessage(text, value, relatedMessageId, containsMedia)),
   sendInvisibleMessageToServer: (value, relatedMessageId = null) => dispatch(ServerMessageActions.sendInvisibleMessage(value, relatedMessageId)),
   sendIntention: (text, intention, content) => dispatch(ServerMessageActions.sendIntention(text, intention, content)),
   loadEarlier: () => dispatch(GUIActions.loadEarlier()),
