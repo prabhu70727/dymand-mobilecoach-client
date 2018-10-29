@@ -2,8 +2,8 @@
 
 buildscript {
     repositories {
-        jcenter()
         google()
+        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.2'
@@ -34,4 +34,12 @@ allprojects {
             url 'https://maven.fabric.io/public'
         }
     }
+}
+
+ext {
+    compileSdkVersion = 26
+    buildToolsVersion = "26.0.3"
+    minSdkVersion = 16
+    compileSdkVersion = 26
+    targetSdkVersion = 26
 }
