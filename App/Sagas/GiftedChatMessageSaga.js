@@ -14,6 +14,14 @@ import AppConfig from '../Config/AppConfig'
 import Log from '../Utils/Log'
 const log = new Log('Sagas/GiftedChatMessageSaga')
 
+//Import forground service for natice code
+import ForegroundServiceModule from '../Containers/Interfaces/ForegroundServiceModule'
+import DymandFGServiceModule from '../Containers/Interfaces/DymandFGServiceModule'
+import AffectiveSliderModule from '../Containers/SelfReport/AffectiveSliderModule'
+import BackgroundVideoRecordingModule from '../Containers/SelfReport/BackgroundVideoRecordingModule'
+import SelfReportDymandModule from '../Containers/SelfReport/SelfReportDymandModule'
+import { PermissionsAndroid } from 'react-native'
+
 let oldestShownMessage = -1
 
 // selectors
@@ -412,6 +420,59 @@ function convertServerMessageToGiftedChatMessages (serverMessage, fakeTimestamp 
       const parsedCommand = Common.parseCommand(serverMessage['server-message'])
 
       switch (parsedCommand.command) {
+
+        case 'remind-user-self-report':
+          DymandFGServiceModule.notifyUserAboutSelfReport()
+          message.type = 'hidden-command'
+          break
+
+        case 'get-timed-wake-lock-min-close-webview':
+          DymandFGServiceModule.timedWakeLockAndCloseWebView(parsedCommand.value)
+          message.type = 'hidden-command'
+          break
+
+        case 'send-time-config-dymand':
+          DymandFGServiceModule.sendConfig("sendConfig")
+          break
+
+
+        case 'send-hasStartedSelfReportSignal':
+          DymandFGServiceModule.sendHasStartedSelfReportSignal()
+          message.type = 'hidden-command'
+          break
+
+        case 'send-selfReportCompletedSignal':
+          DymandFGServiceModule.sendSelfReportCompletedSignal()
+          message.type = 'hidden-command'
+          break 
+
+        case 'show-self-report-dymand':
+          SelfReportDymandModule.show()
+          message.type = 'hidden-command'
+          break
+
+
+        // hidden video recording
+        case 'hidden-video-recording':
+          BackgroundVideoRecordingModule.recordFrontCamera(parsedCommand.value)
+          break
+
+        // show the slider
+        case 'show-affective-slider':
+          AffectiveSliderModule.showSlider()
+          break
+
+        // start intervention command
+        case 'start-intervention':
+          ForegroundServiceModule.stopInitialService()
+          ForegroundServiceModule.startInterventionService()
+          break
+        
+        case 'stop-intervention':
+          ForegroundServiceModule.stopInterventionService()
+          ForegroundServiceModule.startInitialService()
+          break
+
         // Show Info Command
         case 'show-backpack-info':
         case 'show-info': {

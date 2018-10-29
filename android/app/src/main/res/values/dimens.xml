@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <dimen name="TxtSize">24sp</dimen>
+  <dimen name="BtnTxtSize">16sp</dimen>
+  <dimen name="affectSize">16sp</dimen>
+  <dimen name="anchorSize">16sp</dimen>
+</resources>

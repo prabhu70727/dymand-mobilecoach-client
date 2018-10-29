@@ -3,7 +3,7 @@ import {StackNavigator} from 'react-navigation'
 import ScreenStartWithLogo from './ScreenStartWithLogo'
 import ScreenLanguageSelection from './ScreenLanguageSelection'
 // import ScreenAuthorizeUser from './ScreenAuthorizeUser'
-// import ScreenScreeningSurvey from './ScreenScreeningSurvey'
+import ScreenScreeningSurvey from './ScreenScreeningSurvey'
 import ScreenCoachSelection from './ScreenCoachSelection'
 import ScreenWelcomeByCoach from './ScreenWelcomeByCoach'
 
@@ -20,9 +20,9 @@ const OnboardingNav = StackNavigator({
   },
   // Language selection
   // Optional: Comment out if not needed and adjust jump in former Screen
-  ScreenLanguageSelection: {
-    screen: ScreenLanguageSelection
-  },
+  // ScreenLanguageSelection: {
+  //  screen: ScreenLanguageSelection
+  // },
   // Authorize User
   // Optional: Comment out if not needed and adjust jump in former Screen
   // ScreenAuthorizeUser: {

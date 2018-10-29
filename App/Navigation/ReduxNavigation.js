@@ -145,10 +145,11 @@ class ReduxNavigation extends Component {
       modal: {
         visible: true,
         type,
-        onClose: (argument) => { // argument is optional
+        onClose: (argument1, argument2) => { // arguments are optional
+          log.info("Showmodel is called")
           this.hideModal()
           this.props.dispatch(GUIActions.enableSidemenuGestures())
-          onClose(argument)
+          onClose(argument1, argument2)
         },
         content
       },

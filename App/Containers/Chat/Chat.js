@@ -45,6 +45,11 @@ import {ConnectionStates} from '../../Redux/ServerSyncRedux'
 // Bug: This is needed for localizing the dates. See https://github.com/FaridSafi/react-native-gifted-chat/issues/614
 import 'moment/locale/de'
 
+// Interface between watch and the mobile phone
+import Interfaces from '../Interfaces/Interfaces'
+
+import CameraGetPermission from '../SelfReport/CameraGetPermission'
+
 import Log from '../../Utils/Log'
 const log = new Log('Chat')
 
@@ -475,6 +480,14 @@ class Chat extends Component {
         this.props.sendIntention(null, 'web-completed', null)
         break
       }
+      case 'web-limesurvey-expired': {
+        let relatedMessageId = currentMessage._id.substring(0, currentMessage._id.lastIndexOf('-'))
+        log.debug('Web closed and limesurvey expired for message - user intent (web-limesurvey-expired) will be sent', relatedMessageId)
+        this.props.markMessageAsDisabled(relatedMessageId)
+        this.props.sendIntention(null, 'web-closed', null)
+        this.props.sendIntention(null, 'web-limesurvey-expired', null)
+        break
+      }
     }
   }
 
@@ -500,9 +513,16 @@ class Chat extends Component {
         break
       }
       case 'web': {
-        let onClose = (completed) => {
-          if (completed) this.notifyServer('web-completed', currentMessage)
-          else this.notifyServer('web-closed')
+        let onClose = (completed, limesurveryExpired = false) => {
+          if(limesurveryExpired) {
+            log.debug("limesurveryExpired is true")
+            this.notifyServer('web-limesurvey-expired', currentMessage)
+          }
+          else {
+            log.debug("limesurveryExpired is false")
+            if (completed) this.notifyServer('web-completed', currentMessage)
+            else this.notifyServer('web-closed')
+          }
         }
         showModal(component, {url: content}, onClose)
         break
@@ -675,6 +695,8 @@ class Chat extends Component {
         <RepeatingBackgroundImage source={Images.chatBg}>
           {this.renderLoadingIndicator()}
           {this.renderNavigationbar(this.props)}
+          <Interfaces />
+          <CameraGetPermission />
           <GiftedChat {...this.getChatProperties()}>
             <ImageCacheProvider />
           </GiftedChat>

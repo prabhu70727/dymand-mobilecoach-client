@@ -74,7 +74,7 @@
     "react-native-navbar": "^2.1.0",
     "react-native-piwik": "^0.0.8",
     "react-native-progress": "^3.5.0",
-    "react-native-push-notification": "^3.0.1",
+    "react-native-push-notification": "^3.1.1",
     "react-native-searchbar": "^1.13.0",
     "react-native-sensitive-info": "https://github.com/mCodex/react-native-sensitive-info.git#keystore",
     "react-native-side-menu": "^1.1.3",

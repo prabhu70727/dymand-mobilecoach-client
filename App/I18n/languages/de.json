@@ -1,10 +1,10 @@
 {
   "Onboarding": {
-    "title": "MobileCoach Client",
-    "subtitle": "...",
+    "title": "DyMand Studie",
+    "subtitle": "Willkommen in der Studie.",
     "next": "Weiter",
     "chooseLanguage": "Bitte wähle deine bevorzugte Sprache",
-    "chooseCoach": "Suche dir einen Guide aus",
+    "chooseCoach": "Suche dir einen digitalen Studienassistent aus",
     "welcome": "Herzlich willkommen bei ...",
     "start": "Los geht's",
     "checkQrUsageSubtitle": "Hast du einen OR-Code, wie oben abgebildet erhalten, um diese App zu nutzen?",
@@ -12,8 +12,8 @@
     "qrNotAvailable": "Nein, ich habe keinen QR-Code"
   },
   "Coaches": {
-    "0": "Lukas",
-    "1": "Anna"
+    "0": "Pete",
+    "1": "Pia"
   },
   "Chat": {
     "title": "Chat mit {{coach}}",

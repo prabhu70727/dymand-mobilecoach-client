@@ -9,9 +9,9 @@ export default {
   // camelCase name of app, e.g., demoXyz
   // (CAUTION 1: MUST be adjusted for encrypted apps!!!!)
   // (CAUTION 2: Parameter AppConfig.whitelabel must be changed to the same name)
-  project: 'whitelabel',
+  project: 'dymand',
   // Encryption secret for instance of whitelabel app project.
-  projectSecret: 'whitelabel-top-secret',
+  projectSecret: 'dymand-top-secret',
 
   // Configuration of the project
   config: {
@@ -68,7 +68,7 @@ export default {
       showEmptyChatMessage: false
     },
     startup: {
-      automaticallyRequestPushPermissions: false,
+      automaticallyRequestPushPermissions: true,
       automaticallyConnectOnFirstStartup: true,
       backButtonInOnboardingEnabled: false,
       onboardingURL: '---'
@@ -77,18 +77,18 @@ export default {
       useLocalServer: false,
       clientVersion: 1,
       role: 'participant',
-      defaultNickname: 'MobileCoach Client User',
-      interventionPattern: '----',
-      interventionPassword: '----',
-      androidSenderId: '123456789012',
+      defaultNickname: 'newParticipant',
+      interventionPattern: 'DYMAND',
+      interventionPassword: 'TtlYoHob9P3d4XRl',
+      androidSenderId: '465399551649',
       localDeepstreamURL: 'ws://127.0.0.1:6020/deepstream',
       localRestURL: 'http://127.0.0.1:8080/MC/api/v02/',
       localMediaURL: 'http://127.0.0.1/MC/files/',
-      remoteDeepstreamURL: 'wss://---:8443/deepstream',
-      remoteRestURL: 'https://---/MC/api/v02/',
-      remoteMediaURL: 'https://---/MC/files/'
+      remoteDeepstreamURL: 'wss://dymand-cdhi.ethz.ch:6020/deepstream',
+      remoteRestURL: 'https://dymand-cdhi.ethz.ch/MC/api/v02/',
+      remoteMediaURL: 'https://dymand-cdhi.ethz.ch/MC/files/'
     },
-    whitelabel: {
+    dymand: {
       shareUrl: {
         fr: 'https://www.shareurl-fr.fr',
         it: 'https://www.shareurl-it.it',

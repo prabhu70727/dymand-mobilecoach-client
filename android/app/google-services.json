@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "465399551649",
+    "firebase_url": "https://dymand-7961c.firebaseio.com",
+    "project_id": "dymand-7961c",
+    "storage_bucket": "dymand-7961c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:465399551649:android:877d6e6235a0cd9a",
+        "android_client_info": {
+          "package_name": "org.c4dhi.mobilecoach.client"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "465399551649-kjms5blrci25v6ggqm4voeod8qp3rqsm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgxQXGz0z4k0gZ3WF0isAJz4D_KJHpZsY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

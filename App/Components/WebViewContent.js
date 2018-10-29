@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, WebView, StyleSheet, Platform, ActivityIndicator } from 'react-native'
+import { View, WebView, StyleSheet, Platform, ActivityIndicator, DeviceEventEmitter } from 'react-native'
 import {connect} from 'react-redux'
 import KeyboardSpacer from 'react-native-keyboard-spacer'
 
@@ -18,7 +18,30 @@ const log = new Log('Components/WebViewContent')
  */
 
 class WebViewContent extends Component {
+  constructor(props) {
+    super(props);
+    this.closingWebViewlistener = null;
+    log.debug("WebViewContent constructor called")
+  }
+
   componentWillMount () {
+    log.debug("Component will Mount - WebViewContent called")
+    if (this.closingWebViewlistener == null) {
+      log.debug("Setting listener - CLOSING_WEBVIEW_TIMER_EXPIRED")
+      this.closingWebViewlistener = DeviceEventEmitter.addListener('CLOSING_WEBVIEW_TIMER_EXPIRED', this.closeWebViewTimerExpired)
+    }
+  }
+
+  componentWillUnmount () {
+    log.debug("Component will un-Mount WebViewContent called")
+    // the listener will be remved after the expired time or window.postMessage('complete'); occurs (whichever is first)
+    if ( this.closingWebViewlistener != null) this.closingWebViewlistener.remove()
+    this.closingWebViewlistener = null
+  }
+
+  closeWebViewTimerExpired = () => {
+    log.debug("CLOSING_WEBVIEW_TIMER_EXPIRED...")
+    this.props.onClose(true)
   }
 
   render () {
@@ -63,7 +86,7 @@ class WebViewContent extends Component {
               )
             }}
           />
-          {Platform.OS === 'android' ? <KeyboardSpacer /> : null}
+          {/* {Platform.OS === 'android' ? <KeyboardSpacer /> : null} */}
         </View>
       </View>
     )
@@ -87,7 +110,12 @@ class WebViewContent extends Component {
       case 'complete':
         this.props.onClose(true)
         break
+      case 'limesurveyExpired':
+      log.debug('Limesurvey closes with a call to limesurveyExpired')
+        this.props.onClose(false, true)
+        break
       default:
+        log.debug('Data on closing the WebView:', data)
         const jsonData = JSON.parse(data)
         log.debug('Communicating value change to server:', jsonData)
         this.props.sendVariableValue(jsonData.variable, jsonData.value)

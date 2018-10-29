@@ -1,90 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="org.c4dhi.mobilecoach.client"
     android:versionCode="1"
     android:versionName="0.1">
 
+    <uses-sdk
+        android:minSdkVersion="16"
+        android:targetSdkVersion="22" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.RECORD_VIDEO"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.RECORD_VIDEO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission
+        android:name="android.permission.READ_PHONE_STATE"
+        tools:node="remove" />
 
-    <!-- ADDED FOR PUSH NOTIFICATIONS - START -->
+    <!-- for webview closing -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- ADDED FOR PUSH NOTIFICATIONS - START (GCM) -->
+    <!--
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <permission
         android:name="${applicationId}.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
+
     <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
+    -->
+    <!-- ADDED FOR PUSH NOTIFICATIONS - END (GCM) -->
+
+    <!-- ADDED FOR PUSH NOTIFICATIONS - START (FCM/GCM) -->
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <!-- ADDED FOR PUSH NOTIFICATIONS - END -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- ADDED FOR PUSH NOTIFICATIONS - END (FCM/GCM) -->
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
-    <uses-sdk
-        android:minSdkVersion="16"
-        android:targetSdkVersion="22" />
-
     <application
-      android:name=".MainApplication"
-      android:allowBackup="false"
-      android:label="@string/app_name"
-      android:icon="@mipmap/ic_launcher"
-      android:theme="@style/AppTheme"
-      tools:replace="android:allowBackup">
-      <activity
-        android:name=".MainActivity"
+        android:name=".MainApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
-        android:screenOrientation="portrait"
-        android:windowSoftInputMode="adjustPan">
-        <!-- android:windowSoftInputMode="adjustResize" -->
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-     <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
-        </intent-filter>
-      </activity>
-      <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
+        android:theme="@style/AppTheme"
+        tools:replace="android:allowBackup">
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan">
 
-      <!-- ADDED FOR PUSH NOTIFICATIONS - START -->
-      <receiver
-        android:name="com.google.android.gms.gcm.GcmReceiver"
-        android:exported="true"
-        android:permission="com.google.android.c2dm.permission.SEND" >
-        <intent-filter>
-            <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-            <category android:name="${applicationId}" />
-        </intent-filter>
-      </receiver>
+            <!-- android:windowSoftInputMode="adjustResize" -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-      <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationPublisher" />
-      <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBootEventReceiver">
-        <intent-filter>
-            <action android:name="android.intent.action.BOOT_COMPLETED" />
-        </intent-filter>
-      </receiver>
-      <service android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationRegistrationService"/>
-      <service
-        android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationListenerService"
-        android:exported="false" >
-        <intent-filter>
-            <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-        </intent-filter>
-      </service>
-      <!-- ADDED FOR PUSH NOTIFICATIONS - END -->
+                <category android:name="android.intent.category.LAUNCHER" />
 
-      <meta-data
-        android:name="io.fabric.ApiKey"
-        android:value="FABRIC_API_KEY_HERE"
-      />
+                <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
 
+
+        <!-- ADDED FOR PUSH NOTIFICATIONS - START (FCM) -->
+        <meta-data  android:name="com.dieam.reactnativepushnotification.notification_channel_name"
+            android:value="DYMAND"/>
+        <meta-data  android:name="com.dieam.reactnativepushnotification.notification_channel_description"
+            android:value="You have a message"/>
+        <!-- Change the resource name to your App's accent color - or any other color you want -->
+        <meta-data  android:name="com.dieam.reactnativepushnotification.notification_color"
+            android:resource="@android:color/white"/>
+        <!-- ADDED FOR PUSH NOTIFICATIONS - END (FCM) -->
+
+
+        <!-- ADDED FOR PUSH NOTIFICATIONS - START (GCM) -->
+        <!--
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
+                <category android:name="${applicationId}" />
+            </intent-filter>
+        </receiver>
+        -->
+        <!-- ADDED FOR PUSH NOTIFICATIONS - END (GCM)-->
+
+        <!-- ADDED FOR PUSH NOTIFICATIONS - START (FCM/GCM) -->
+        <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationPublisher" />
+        <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBootEventReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <service android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationRegistrationService"/>
+        <!-- ADDED FOR PUSH NOTIFICATIONS - START (FCM/GCM) -->
+
+        <!-- ADDED FOR PUSH NOTIFICATIONS - START (GCM) -->
+        <!--
+        <service
+            android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+        -->
+        <!-- ADDED FOR PUSH NOTIFICATIONS - END (GCM) -->
+
+        <!-- ADDED FOR PUSH NOTIFICATIONS - START (FCM) -->
+        <service
+            android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationListenerService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <!-- ADDED FOR PUSH NOTIFICATIONS - END (FCM) -->
+
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="6e26adbc042d15e2df6859fde327b4a337287fcc" />
+
+        <service
+            android:name=".InitialFGService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".InterventionFGService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".DymandFGService.DymandFGService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <activity android:name=".AffectiveSlider.AffectiveSliderActivity" />
+        <activity android:name=".SelfReportDymand.SelfReportDymandActivity" />
     </application>
 
 </manifest>

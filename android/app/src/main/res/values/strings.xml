@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">MobileCoach Client</string>
+    <string name="notification_title">DYMAND App</string>
+    <string name="notification_message_initial">Initial Service Running</string>
+    <string name="notification_message_intervention">Intervention Service Running</string>
+    <string name="next">Weiter</string>
+    <string name="affectiveQuestion">Bitte teilen Sie uns mit den beiden Schiebern mit, wie Sie sich
+        gerade fühlen. Denken Sie nicht zu lange nach, folgen Sie einfach Ihrem Bauchgefühl.</string>
+    <string name="müde">müde</string>
+    <string name="arousalExpl">Wie müde bzw. wach fühlen Sie sich gerade?</string>
+    <string name="wach">wach</string>
+    <string name="img">Bild nicht gefunden.\nBitte wenden Sie sich an psanthan@ethz.ch</string>
+    <string name="unglücklich">unglücklich</string>
+    <string name="emotionExpl">Wie unglücklich bzw. glücklich fühlen Sie sich gerade?</string>
+    <string name="glücklich">glücklich</string>
+    <string name="weiter">Weiter</string>
+    <string name="slider_header">Self Report</string>
+    <string name="alert_neutral_positions">At least one of the values is in the middle position. Do you want to change it?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="notification_message_dymand">Running</string>
+
 </resources>
