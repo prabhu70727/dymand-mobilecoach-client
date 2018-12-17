@@ -2,6 +2,7 @@ package org.c4dhi.mobilecoach.client.SelfReportDymand;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -19,10 +20,12 @@ public class SelfReportDymandModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void show(){
+  public void show(String arguments){
     Activity currentActivity = getCurrentActivity();
-    //ReactApplicationContext context = getReactApplicationContext();
     Intent intent = new Intent(currentActivity, SelfReportDymandActivity.class);
+    Bundle bundle = new Bundle();
+    bundle.putString("extras", arguments); //Your id
+    intent.putExtras(bundle); //Put your id to your next Intent
     currentActivity.startActivity(intent);
   }
 

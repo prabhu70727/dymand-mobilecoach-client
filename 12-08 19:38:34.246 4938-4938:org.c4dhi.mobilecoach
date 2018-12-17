@@ -1,0 +1,37 @@
+12-08 19:38:34.246 4938-4938/org.c4dhi.mobilecoach.client I/Logs: DymandFGService: The service is lit!!
+12-08 19:53:34.251 4938-4938/org.c4dhi.mobilecoach.client I/Logs: DymandFGService: The service is lit!!
+12-08 20:08:34.283 4938-4938/org.c4dhi.mobilecoach.client I/Logs: DymandFGService: The service is lit!!
+12-08 20:13:46.280 8340-8340/? I/Logs: DymandFGService: onCreate
+12-08 20:13:46.299 8340-8340/? I/Logs: DymandFGService: onStartCommand
+12-08 20:13:46.321 8340-8340/? I/Logs: DymandFGService: startForeground dymand service
+12-08 20:13:46.366 8340-8340/? I/Logs: DymandFGService: Success while adding listener
+12-08 20:13:53.587 8340-8411/org.c4dhi.mobilecoach.client I/Logs: DymandFGServModul: org.c4dhi.mobilecoach.client.DymandFGService.DymandFGService
+    Foreground services count: 1
+    Checking whether the required service exists...
+12-08 20:13:54.267 8340-8411/org.c4dhi.mobilecoach.client I/Logs: DymandFGServModul: Broadcasting Config
+12-08 20:13:54.275 8340-8340/org.c4dhi.mobilecoach.client I/Logs: DymandFGService: The broadcast message from module is received
+12-08 20:13:54.280 8340-8446/org.c4dhi.mobilecoach.client I/Logs: DymandFGService: Sending configuration.
+12-08 20:13:54.309 8340-8340/org.c4dhi.mobilecoach.client I/Logs: DymandFGService: Sending configuration was successful: sendConfig 8-10-17--9-23 34282 DataItemParcelable[@dbbaf74,dataSz=63, numAssets=0, uri=wear://afcc7e15/getconfig]
+12-08 20:13:54.316 8340-8340/org.c4dhi.mobilecoach.client I/Logs: DymandFGService: onDataChanged in mobile.
+12-08 20:13:54.317 8340-8340/org.c4dhi.mobilecoach.client I/Logs: DymandFGService: onDataChanged data event - changed.
+12-08 20:13:54.974 8340-8411/org.c4dhi.mobilecoach.client I/Logs: DymandFGServModul: The current time stamp: 1544296434974
+12-08 20:13:54.975 8340-8411/org.c4dhi.mobilecoach.client I/Logs: DymandFGServModul: The expiry time stamp: 1544267170227
+    The survey is already expired
+12-08 20:13:54.998 8340-8411/org.c4dhi.mobilecoach.client I/Logs: DymandFGServModul: The current time stamp: 1544296434998
+    The expiry time stamp: 1544265046370
+    The survey is already expired
+12-08 20:13:55.041 8340-8340/org.c4dhi.mobilecoach.client I/Logs: SelfReportDymandActivity: OnCreate
+12-08 20:13:55.042 8340-8340/org.c4dhi.mobilecoach.client I/Logs: SelfReportDymandActivity: The argument is: 1544264470227-45-eod
+    The current time stamp: 1544296435042
+    The expiry time stamp: 1544267170227
+    The survey is already expired
+12-08 20:13:55.281 8340-8340/org.c4dhi.mobilecoach.client I/Logs: SelfReportDymandActivity: Creating directory
+12-08 20:13:55.282 8340-8340/org.c4dhi.mobilecoach.client I/Logs: SelfReportDymandActivity: intitalizeCamera
+    getCamera
+12-08 20:13:55.515 8340-8340/org.c4dhi.mobilecoach.client I/Logs: SelfReportDymandActivity: OnCreate
+    The argument is: 1544264446370-10-es
+    The current time stamp: 1544296435515
+    The expiry time stamp: 1544265046370
+    The survey is already expired
+12-08 20:13:55.635 8340-8340/org.c4dhi.mobilecoach.client I/Logs: SelfReportDymandActivity: intitalizeCamera
+    getCamera

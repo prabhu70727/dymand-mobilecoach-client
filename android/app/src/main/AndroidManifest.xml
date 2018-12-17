@@ -5,9 +5,6 @@
     android:versionCode="1"
     android:versionName="0.1">
 
-    <uses-sdk
-        android:minSdkVersion="16"
-        android:targetSdkVersion="22" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -145,6 +142,23 @@
             android:name=".DymandFGService.DymandFGService"
             android:enabled="true"
             android:exported="false" />
+
+        <service android:name=".DymandFGService.DymandFGReceiverService$DymandFGServiceInternal"
+            android:enabled="true"
+            android:exported="false" />
+
+        <receiver android:name=".DymandFGService.DymandFGReceiverService" />
+
+        <receiver
+            android:name=".StartServiceAtBootReceiver"
+            android:enabled="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
 
         <activity android:name=".AffectiveSlider.AffectiveSliderActivity" />
         <activity android:name=".SelfReportDymand.SelfReportDymandActivity" />

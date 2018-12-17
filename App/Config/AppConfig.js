@@ -16,7 +16,7 @@ export default {
   // Configuration of the project
   config: {
     dev: {
-      purgeStoreAtStartup: true,
+      purgeStoreAtStartup: false,
       fakeDeviceAlwaysOnlineForOfflineDev: false,
       fakeQRCodeScanWithURL: null,
       allowDebugKeyboard: false
@@ -78,14 +78,14 @@ export default {
       clientVersion: 1,
       role: 'participant',
       defaultNickname: 'newParticipant',
-      interventionPattern: 'DYMAND',
+      interventionPattern: 'DYMAND DEV',
       interventionPassword: 'TtlYoHob9P3d4XRl',
       androidSenderId: '465399551649',
       localDeepstreamURL: 'ws://127.0.0.1:6020/deepstream',
       localRestURL: 'http://127.0.0.1:8080/MC/api/v02/',
       localMediaURL: 'http://127.0.0.1/MC/files/',
-      remoteDeepstreamURL: 'wss://dymand-cdhi.ethz.ch:6020/deepstream',
-      remoteRestURL: 'https://dymand-cdhi.ethz.ch/MC/api/v02/',
+      remoteDeepstreamURL: 'wss://dymand-cdhi.ethz.ch:6021/deepstream',
+      remoteRestURL: 'https://dymand-cdhi.ethz.ch:8444/MC/api/v02/',
       remoteMediaURL: 'https://dymand-cdhi.ethz.ch/MC/files/'
     },
     dymand: {

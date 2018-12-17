@@ -16,6 +16,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.react.modules.core.DeviceEventManagerModule;
@@ -49,19 +50,22 @@ public class SelfReportDymandActivity extends AppCompatActivity
     private File mPleasureFile;
     private String mDirectory;
 
-    private int finishTimeInMin = 5; // 5 minutes to close the App
+    private int finishTime = 0; // 5 minutes to close the App
     private boolean mWakeLockAcquired = false;
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
     private Handler mWakeLockHandler;
     private Runnable mWakeLockRunnable;
+    private boolean eod = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(LOG_TAG, "OnCreate");
+        Bundle bundle = getIntent().getExtras();
+        String arguments = bundle.getString("extras");
 
-        // set timer for non-activity for 10 minutes
-        inactiveFinishActivity();
+        // set timer for non-activity for finishTimeInMin minutes
+        inactiveFinishActivity(arguments);
 
         super.onCreate(savedInstanceState);
         int random = new Random().nextInt(2);
@@ -72,6 +76,9 @@ public class SelfReportDymandActivity extends AppCompatActivity
         Button weiter = (Button) findViewById(R.id.contA);
         weiter.setEnabled(false);
         SeekBar em = (SeekBar) findViewById(R.id.emotion);
+
+        setSliderQuestion();
+
         em.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -118,8 +125,55 @@ public class SelfReportDymandActivity extends AppCompatActivity
         intitalizeCamera();
     }
 
+    private void setSliderQuestion() {
+        // set the question message on the slider!!
+
+        TextView affectiveQuestion = (TextView) findViewById(R.id.textView2);
+
+        String affectiveQuestionText;
+
+        if(eod){
+            affectiveQuestionText = "Bitte teilen Sie uns mit den beiden Schiebern mit, wie Sie sich" +
+                    " heute gefühlt haben. Denken Sie nicht zu lange nach, folgen Sie einfach Ihrem Bauchgefühl" ;
+        }
+        else {
+            affectiveQuestionText = "Bitte teilen Sie uns mit den beiden Schiebern mit, wie Sie sich " +
+                    "in den letzten 5 Minuten gefühlt haben. Denken Sie nicht zu lange nach, folgen Sie einfach Ihrem Bauchgefühl";
+        }
+
+        affectiveQuestion.setText(affectiveQuestionText);
+    }
+
+
     // todo test it...
-    private void inactiveFinishActivity() {
+    private void inactiveFinishActivity(String arguments) {
+
+        Log.i(LOG_TAG, "The argument is: " + arguments);
+        String [] tokens = arguments.split("-");
+        if(tokens.length < 3) {
+            Log.e(LOG_TAG, "Arguments to call TimedWakeLockCloseWebView is not valid, arguments: "+ arguments);
+            return;
+        }
+
+        if(tokens[2].contains("eod")) {
+            eod = true;
+        }
+        else {
+            eod = false;
+        }
+
+        long startTime = Long.parseLong(tokens[0]);
+        long curTime = System.currentTimeMillis();
+        long expiryTime = Integer.parseInt(tokens[1]) * 60 * 1000 + startTime;
+        Log.i(LOG_TAG, "The current time stamp: " + curTime);
+        Log.i(LOG_TAG, "The expiry time stamp: " + expiryTime);
+
+        if(curTime > expiryTime) {
+            Log.i(LOG_TAG, "The survey is already expired");
+            finishActivity();
+            return;
+        }
+
         mPowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "Dymand::TimedWakeLockSliderRemove");
@@ -135,7 +189,7 @@ public class SelfReportDymandActivity extends AppCompatActivity
                 finishActivity(); // releasing wake lock inside this function
             }
         };
-        mWakeLockHandler.postDelayed(mWakeLockRunnable, finishTimeInMin * 60 * 1000);
+        mWakeLockHandler.postDelayed(mWakeLockRunnable, expiryTime-curTime);
     }
 
     private void createFilesAndFolder() throws IOException {

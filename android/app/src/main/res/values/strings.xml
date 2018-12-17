@@ -5,7 +5,7 @@
     <string name="notification_message_intervention">Intervention Service Running</string>
     <string name="next">Weiter</string>
     <string name="affectiveQuestion">Bitte teilen Sie uns mit den beiden Schiebern mit, wie Sie sich
-        gerade fühlen. Denken Sie nicht zu lange nach, folgen Sie einfach Ihrem Bauchgefühl.</string>
+        in den letzten 5 Minuten gefühlt haben. Denken Sie nicht zu lange nach, folgen Sie einfach Ihrem Bauchgefühl</string>
     <string name="müde">müde</string>
     <string name="arousalExpl">Wie müde bzw. wach fühlen Sie sich gerade?</string>
     <string name="wach">wach</string>

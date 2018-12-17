@@ -12,5 +12,7 @@ public class Config {
     };
     public static final String SENSOR_FILE_EXTENSION = ".csv";
     public static boolean hasStartedSelfReport = false;
-
+    public static boolean DymandFGServiceRunning = false;
+    public static boolean onBoardingDone = false;
+    public static int periodicLogsInMin = 15;
 }

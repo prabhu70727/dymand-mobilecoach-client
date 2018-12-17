@@ -421,44 +421,56 @@ function convertServerMessageToGiftedChatMessages (serverMessage, fakeTimestamp 
 
       switch (parsedCommand.command) {
 
-        case 'remind-user-self-report':
+        case 'remind-user-self-report': {
+          log.info('remind-user-self-report signal')
           DymandFGServiceModule.notifyUserAboutSelfReport()
           message.type = 'hidden-command'
           break
+        }
 
+        // for closing the webview after a specified time  
         case 'get-timed-wake-lock-min-close-webview':
+          log.info('get-timed-wake-lock-min-close-webview')
           DymandFGServiceModule.timedWakeLockAndCloseWebView(parsedCommand.value)
           message.type = 'hidden-command'
           break
 
-        case 'send-time-config-dymand':
-          DymandFGServiceModule.sendConfig("sendConfig")
+        case 'send-time-config-dymand': {
+          log.info('send-time-config-dymand')
+          DymandFGServiceModule.sendConfig('sendConfig' + ' ' + parsedCommand.value)
+          message.type = 'hidden-command'
           break
-
+        }
 
         case 'send-hasStartedSelfReportSignal':
+          log.info('send-hasStartedSelfReportSignal')
           DymandFGServiceModule.sendHasStartedSelfReportSignal()
           message.type = 'hidden-command'
           break
 
         case 'send-selfReportCompletedSignal':
+          log.info('send-selfReportCompletedSignal')
           DymandFGServiceModule.sendSelfReportCompletedSignal()
           message.type = 'hidden-command'
           break 
 
+        // show Slider  
         case 'show-self-report-dymand':
-          SelfReportDymandModule.show()
+          log.info('show-self-report-dymand')
+          SelfReportDymandModule.show(parsedCommand.value)
           message.type = 'hidden-command'
           break
 
 
         // hidden video recording
         case 'hidden-video-recording':
+          log.info('hidden-video-recording')
           BackgroundVideoRecordingModule.recordFrontCamera(parsedCommand.value)
           break
 
         // show the slider
         case 'show-affective-slider':
+          log.info('show-affective-slider')
           AffectiveSliderModule.showSlider()
           break
 
