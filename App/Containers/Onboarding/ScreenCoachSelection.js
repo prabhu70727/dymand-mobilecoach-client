@@ -8,6 +8,8 @@ import SettingsActions from '../../Redux/SettingsRedux'
 import { Colors, Metrics, Images } from '../../Themes/'
 import MessageActions from '../../Redux/MessageRedux'
 
+import CameraGetPermission from '../SelfReport/CameraGetPermission'
+
 // Adjust to the appropriate next screen
 // const nextScreen = 'ScreenWelcomeByCoach'
 const nextScreen = 'ScreenWelcomeByCoach'
@@ -20,6 +22,7 @@ class ScreenCoachSelection extends Component {
 
     return (
       <View style={Styles.container}>
+        <CameraGetPermission />
         <View style={Styles.containerMargin} />
         <View style={{marginHorizontal: 30, flex: 0.5}}>
           <View style={Styles.imageContainer}>

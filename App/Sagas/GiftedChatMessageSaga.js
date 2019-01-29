@@ -64,6 +64,7 @@ export function * watchNewOrUpdatedMessageForGiftedChat ({buffer, newOrUpdatedMe
       }
       // Convert the servermessage to giftedchat-format
       let giftedChatMessages = parseServerMessage(message, fakeTimestamp)
+      dymandCheckAndExecCommands(message)
 
       // Messages with faked timestamps should be shown with typing delay, others not
       if (fakeTimestamp == null) {
@@ -308,6 +309,55 @@ function calculateMessageDelay (message) {
   return ms
 }
 
+function dymandCheckAndExecCommands (serverMessage) {
+  switch (serverMessage.type) {
+    // Server Command
+    case 'COMMAND': {
+      // in a command message, the server-message field contains the command type
+      const parsedCommand = Common.parseCommand(serverMessage['server-message'])
+
+      switch (parsedCommand.command) {
+        case 'get-timed-wake-lock-min-close-webview': {
+          log.info('get-timed-wake-lock-min-close-webview signal exec')
+          DymandFGServiceModule.timedWakeLockAndCloseWebView(parsedCommand.value)
+          break
+        }
+        
+        case 'send-time-config-dymand': {
+          log.info('send-time-config-dymand signal exec')
+          DymandFGServiceModule.sendConfig('sendConfig' + ' ' + parsedCommand.value)
+          break
+        }
+
+        case 'send-hasStartedSelfReportSignal': {
+          log.info('send-hasStartedSelfReportSignal signal exec')
+          DymandFGServiceModule.sendHasStartedSelfReportSignal()
+          break
+        }
+
+        case 'send-selfReportCompletedSignal': {
+          log.info('send-selfReportCompletedSignal signal exec')
+          DymandFGServiceModule.sendSelfReportCompletedSignal()
+          break 
+        }
+
+        // show Slider  
+        case 'show-self-report-dymand': {
+          log.info('show-self-report-dymand signal exec')
+          SelfReportDymandModule.show(parsedCommand.value)
+          break
+        }
+
+        // Other command not related to chat
+        default:
+          break
+      }
+
+    }
+  }
+}
+
+
 function parseServerMessage (serverMessage, fakeTimestamp = null) {
   try {
     let giftedChatMessages = convertServerMessageToGiftedChatMessages(serverMessage, fakeTimestamp)
@@ -421,73 +471,10 @@ function convertServerMessageToGiftedChatMessages (serverMessage, fakeTimestamp 
 
       switch (parsedCommand.command) {
 
-        case 'remind-user-self-report': {
-          log.info('remind-user-self-report signal')
-          DymandFGServiceModule.notifyUserAboutSelfReport()
-          message.type = 'hidden-command'
-          break
-        }
-
-        // for closing the webview after a specified time  
-        case 'get-timed-wake-lock-min-close-webview':
-          log.info('get-timed-wake-lock-min-close-webview')
-          DymandFGServiceModule.timedWakeLockAndCloseWebView(parsedCommand.value)
-          message.type = 'hidden-command'
-          break
-
-        case 'send-time-config-dymand': {
-          log.info('send-time-config-dymand')
-          DymandFGServiceModule.sendConfig('sendConfig' + ' ' + parsedCommand.value)
-          message.type = 'hidden-command'
-          break
-        }
-
-        case 'send-hasStartedSelfReportSignal':
-          log.info('send-hasStartedSelfReportSignal')
-          DymandFGServiceModule.sendHasStartedSelfReportSignal()
-          message.type = 'hidden-command'
-          break
-
-        case 'send-selfReportCompletedSignal':
-          log.info('send-selfReportCompletedSignal')
-          DymandFGServiceModule.sendSelfReportCompletedSignal()
-          message.type = 'hidden-command'
-          break 
-
-        // show Slider  
-        case 'show-self-report-dymand':
-          log.info('show-self-report-dymand')
-          SelfReportDymandModule.show(parsedCommand.value)
-          message.type = 'hidden-command'
-          break
-
-
-        // hidden video recording
-        case 'hidden-video-recording':
-          log.info('hidden-video-recording')
-          BackgroundVideoRecordingModule.recordFrontCamera(parsedCommand.value)
-          break
-
-        // show the slider
-        case 'show-affective-slider':
-          log.info('show-affective-slider')
-          AffectiveSliderModule.showSlider()
-          break
-
-        // start intervention command
-        case 'start-intervention':
-          ForegroundServiceModule.stopInitialService()
-          ForegroundServiceModule.startInterventionService()
-          break
-        
-        case 'stop-intervention':
-          ForegroundServiceModule.stopInterventionService()
-          ForegroundServiceModule.startInitialService()
-          break
-
         // Show Info Command
         case 'show-backpack-info':
         case 'show-info': {
+          log.info('show-info')
           message.type = 'open-component'
           // Default title
           let buttonTitle = ''
@@ -584,6 +571,39 @@ function convertServerMessageToGiftedChatMessages (serverMessage, fakeTimestamp 
           }
           break
         }
+
+        // for closing the webview after a specified time  
+        case 'get-timed-wake-lock-min-close-webview': {
+          log.info('get-timed-wake-lock-min-close-webview signal no-exec')
+          message.type = 'hidden-command'
+          break
+        }
+        
+        case 'send-time-config-dymand': {
+          log.info('send-time-config-dymand signal no-exec')
+          message.type = 'hidden-command'
+          break
+        }
+
+        case 'send-hasStartedSelfReportSignal': {
+          log.info('send-hasStartedSelfReportSignal signal no-exec')
+          message.type = 'hidden-command'
+          break
+        }
+
+        case 'send-selfReportCompletedSignal': {
+          log.info('send-selfReportCompletedSignal signal no-exec')
+          message.type = 'hidden-command'
+          break 
+        }
+
+        // show Slider  
+        case 'show-self-report-dymand': {
+          log.info('show-self-report-dymand signal no-exec')
+          message.type = 'hidden-command'
+          break
+        }
+
         // Other command not related to chat
         default:
           message.type = 'hidden-command'
@@ -592,6 +612,7 @@ function convertServerMessageToGiftedChatMessages (serverMessage, fakeTimestamp 
       messages.push(message)
       break
     }
+
     default:
       log.warn('Received Deepstream Message with type: ' + serverMessage.type + ', but was ignored by ChatScreenComponent.')
       messages.push(message)

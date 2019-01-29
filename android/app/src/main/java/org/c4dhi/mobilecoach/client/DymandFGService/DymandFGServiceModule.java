@@ -22,23 +22,21 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import org.c4dhi.mobilecoach.client.Config;
-import org.c4dhi.mobilecoach.client.InterventionFGService;
 import org.c4dhi.mobilecoach.client.MainActivity;
 import org.c4dhi.mobilecoach.client.R;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import static org.c4dhi.mobilecoach.client.Config.DymandFGServiceRunning;
 import static org.c4dhi.mobilecoach.client.Config.onBoardingDone;
+import static org.c4dhi.mobilecoach.client.Config.pendingIntentFlag;
 
 public class DymandFGServiceModule extends ReactContextBaseJavaModule {
 
@@ -125,9 +123,13 @@ public class DymandFGServiceModule extends ReactContextBaseJavaModule {
 
     private void sendIntentToServerRecordingDone() {
         Config.hasStartedSelfReport = false;
+        WritableMap params = Arguments.createMap();
+        String timeStamp = System.currentTimeMillis() + "";
+        Log.i(LOG_TAG, "User intent (RD) time stamp is " + timeStamp +".");
+        params.putString("RD_TimeStamp", timeStamp);
         Log.i(LOG_TAG, "User intent (RD) is being sent... ");
         getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit("USER_INTENT_RECORDING_DONE_LISTENER_TAG", null);
+                .emit("USER_INTENT_RECORDING_DONE_LISTENER_TAG", params);
     }
 
     // Methods that are used to send intent to server - END
@@ -138,7 +140,7 @@ public class DymandFGServiceModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void startServiceOld(Callback errorCallback, Callback startedCAllback) {
+    public void startService(Callback errorCallback, Callback startedCAllback) {
         //Toast.makeText(getReactApplicationContext(), "Trying to start initial service...", Toast.LENGTH_SHORT).show();
         //if(DymandFGServiceRunning) return;
         Log.i(LOG_TAG, "Foreground services count: " + getFGServiceCount());
@@ -180,7 +182,7 @@ public class DymandFGServiceModule extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void startService(Callback errorCallback, Callback startedCallback) {
+    public void startServiceWithAlarm(Callback errorCallback, Callback startedCallback) {
         //Toast.makeText(getReactApplicationContext(), "Trying to start initial service...", Toast.LENGTH_SHORT).show();
         //if(DymandFGServiceRunning) return;
         Log.i(LOG_TAG, "Foreground services count: " + getFGServiceCount());
@@ -195,12 +197,12 @@ public class DymandFGServiceModule extends ReactContextBaseJavaModule {
 
         AlarmManager alarmMgr = (AlarmManager) getReactApplicationContext().getSystemService(Context.ALARM_SERVICE);
         Intent startServiceIntent = new Intent(getReactApplicationContext(), DymandFGReceiverService.class);
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(getReactApplicationContext(), 711, startServiceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(getReactApplicationContext(), 711, startServiceIntent, pendingIntentFlag);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 5*60*1000, alarmIntent);
+            alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), alarmIntent);
         }
         else {
-            alarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 5*60*1000, alarmIntent);
+            alarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), alarmIntent);
         }
 
         onBoardingDone = true;
@@ -250,20 +252,21 @@ public class DymandFGServiceModule extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void notifyUserAboutSelfReport() {
+    public void showNotificationES(String contentText) {
         Log.i(LOG_TAG, "Starting to put notification about the reminder...");
         createNotificationChannelSelfReport();
         Intent notificationIntent = new Intent(getReactApplicationContext(), MainActivity.class);
         PendingIntent pendingIntent =
-                PendingIntent.getActivity(getReactApplicationContext(), 0, notificationIntent, 0);
+                PendingIntent.getActivity(getReactApplicationContext(), 0, notificationIntent, pendingIntentFlag);
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getReactApplicationContext(), CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle("Dymand App")
-                .setContentText("Reminder to fill the self report")
+                .setContentText(contentText)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 // Set the intent that will fire when the user taps the notification
                 .setContentIntent(pendingIntent)
+                .setLocalOnly(true)
                 .setAutoCancel(true);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getReactApplicationContext());
@@ -299,6 +302,8 @@ public class DymandFGServiceModule extends ReactContextBaseJavaModule {
             return;
         }
 
+        Config.webViewCloseTimerCount++;
+
         long startTime = Long.parseLong(tokens[0]);
         long curTime = System.currentTimeMillis();
         long expiryTime = Integer.parseInt(tokens[1]) * 60 * 1000 + startTime;
@@ -318,9 +323,18 @@ public class DymandFGServiceModule extends ReactContextBaseJavaModule {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Log.i(LOG_TAG, "Releasing wake lock and closing webview");
-                getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                        .emit("CLOSING_WEBVIEW_TIMER_EXPIRED", null);
+
+                Config.webViewCloseTimerCount--;
+                Log.i(LOG_TAG, "Releasing wake lock and checking to close closing webview");
+
+                if(Config.webViewCloseTimerCount != 0) {
+                    Log.i(LOG_TAG, "Not closing webView, total timedWakeLockAndCloseWebView remaining:" + Config.webViewCloseTimerCount);
+                }
+                else {
+                    Log.i(LOG_TAG, "Closing webView");
+                    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                            .emit("CLOSING_WEBVIEW_TIMER_EXPIRED", null);
+                }
                 wakeLock.release();
             }
         }, (expiryTime-curTime) + 5000); // 5 second buffer to let the timer inside limesurvey to act first.
@@ -341,7 +355,7 @@ public class DymandFGServiceModule extends ReactContextBaseJavaModule {
                 Log.i(LOG_TAG, "Releasing wake lock and try to notify user about self report");
                 //getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 //        .emit("USER_INTENT_SELF_REPORT_REMIND_USER_LISTENER_TAG", null);
-                if(!Config.hasStartedSelfReport) notifyUserAboutSelfReport();
+                if(!Config.hasStartedSelfReport) showNotificationES("Reminder to fill the self report");
                 else {
                     Log.i(LOG_TAG, "The user need not be notified as the self report is already started.");
                 }

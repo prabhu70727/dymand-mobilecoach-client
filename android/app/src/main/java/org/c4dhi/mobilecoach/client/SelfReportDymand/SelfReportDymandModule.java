@@ -21,12 +21,12 @@ public class SelfReportDymandModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void show(String arguments){
-    Activity currentActivity = getCurrentActivity();
-    Intent intent = new Intent(currentActivity, SelfReportDymandActivity.class);
+    //Activity currentActivity = getCurrentActivity();
+    Intent intent = new Intent(this.getReactApplicationContext(), SelfReportDymandActivity.class);
     Bundle bundle = new Bundle();
     bundle.putString("extras", arguments); //Your id
     intent.putExtras(bundle); //Put your id to your next Intent
-    currentActivity.startActivity(intent);
+    this.getReactApplicationContext().startActivity(intent);
   }
 
 }

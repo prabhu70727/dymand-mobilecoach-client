@@ -283,8 +283,8 @@ public class DymandFGReceiverService extends WakefulBroadcastReceiver {
       Log.i(LOG_TAG, "onHandleIntent");
       Notification notification = null;
       Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
-      PendingIntent pendingIntent =
-        PendingIntent.getActivity(this, 0, notificationIntent, 0);
+      //PendingIntent pendingIntent =
+      //  PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         NotificationChannel serviceChannel = new NotificationChannel(CHANNEL_ID,
@@ -299,7 +299,7 @@ public class DymandFGReceiverService extends WakefulBroadcastReceiver {
             .setContentText(getText(R.string.notification_message_dymand))
             .setSmallIcon(R.drawable.ic_notification)
             .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setContentIntent(pendingIntent)
+            //.setContentIntent(pendingIntent)
             .setOngoing(true)
             .build();
 
@@ -310,7 +310,7 @@ public class DymandFGReceiverService extends WakefulBroadcastReceiver {
             .setContentTitle(getText(R.string.notification_title))
             .setContentText(getText(R.string.notification_message_dymand))
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentIntent(pendingIntent)
+            //.setContentIntent(pendingIntent)
             .setOngoing(true)
             .build();
       }

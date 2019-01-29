@@ -26,7 +26,7 @@ export default {
       reduxStorageBlacklist: ['search', 'nav', 'hydrationCompleted', 'serverSyncStatus', 'giftedchatmessages', 'guistate']
     },
     logger: { // Levels: 'DEBUG', 'INFO', 'WARN', 'ERROR', 'OFF', 'CRASHLYTICS'
-      defaultLevel: 'DEBUG', // 'OFF' to deactivate the WHOLE logger (also exceptions)
+      defaultLevel: 'OFF', // 'OFF' to deactivate the WHOLE logger (also exceptions)
       trackActivities: false,
       trackingURL: 'https://---/piwik/piwik.php',
       trackingId: 0,
@@ -46,7 +46,7 @@ export default {
         'Redux/ServerSyncRedux': 'INFO',
         'Redux/StoryProgressRedux': 'INFO',
         'Sagas/FoodDiarySaga': 'INFO',
-        'Sagas/GiftedChatMessageSaga': 'INFO',
+        'Sagas/GiftedChatMessageSaga': 'DEBUG',
         'Sagas/MessageSagas': 'INFO',
         'Sagas/ServerSyncSagas': 'INFO',
         'Utils/PushNotifications': 'INFO'
@@ -78,14 +78,17 @@ export default {
       clientVersion: 1,
       role: 'participant',
       defaultNickname: 'newParticipant',
-      interventionPattern: 'DYMAND DEV',
+      interventionPattern: 'DYMAND TEST',
       interventionPassword: 'TtlYoHob9P3d4XRl',
       androidSenderId: '465399551649',
       localDeepstreamURL: 'ws://127.0.0.1:6020/deepstream',
       localRestURL: 'http://127.0.0.1:8080/MC/api/v02/',
       localMediaURL: 'http://127.0.0.1/MC/files/',
-      remoteDeepstreamURL: 'wss://dymand-cdhi.ethz.ch:6021/deepstream',
-      remoteRestURL: 'https://dymand-cdhi.ethz.ch:8444/MC/api/v02/',
+      //remoteDeepstreamURL: 'wss://dymand-cdhi.ethz.ch:6021/deepstream',
+      //remoteRestURL: 'https://dymand-cdhi.ethz.ch:8444/MC/api/v02/',
+      //remoteMediaURL: 'https://dymand-cdhi.ethz.ch:8444/MC/files/'
+      remoteDeepstreamURL: 'wss://dymand-cdhi.ethz.ch/ds/deepstream',
+      remoteRestURL: 'https://dymand-cdhi.ethz.ch/MC/api/v02/',
       remoteMediaURL: 'https://dymand-cdhi.ethz.ch/MC/files/'
     },
     dymand: {

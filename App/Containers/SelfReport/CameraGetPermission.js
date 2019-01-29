@@ -25,7 +25,7 @@ async function requestCameraPermission() {
         PermissionsAndroid.PERMISSIONS.CAMERA,
         {
           'title': 'Camera Permission',
-          'message': 'Dymand App needs access to your camera '
+          'message': 'Dymand App benötigt Zugriff auf Ihre Kamera.'
         }
       )
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
@@ -44,7 +44,7 @@ async function requestCameraPermission() {
         PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
         {
           'title': 'Audio Permission',
-          'message': 'Dymand App needs access to your audio'
+          'message': 'Dymand App benötigt Zugriff auf Ihr Audio.'
         }
       )
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {

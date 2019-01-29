@@ -7,6 +7,7 @@ import NextButton from '../../Components/NextButton'
 import { Colors, Images } from '../../Themes/'
 import I18n from '../../I18n/I18n'
 import MessageActions from '../../Redux/MessageRedux'
+import CameraGetPermission from '../SelfReport/CameraGetPermission'
 
 // Adjust to the appropriate next screen
 //const nextScreen = 'ScreenLanguageSelection'
@@ -19,6 +20,7 @@ class ScreenStartWithLogo extends Component {
     const { navigate } = this.props.navigation
     return (
       <View style={styles.container}>
+        <CameraGetPermission />
         <View style={styles.imageContainer}>
           <View style={styles.logoContainer}>
             <Image style={styles.logoImage} source={Images.appLogo} />

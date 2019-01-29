@@ -11,7 +11,7 @@ const log = new Log('Interfaces')
 class Interfaces extends Component {
     componentDidMount = () => {
         log.debug("componentDidMount called")
-        DymandFGServiceModule.startService(
+        DymandFGServiceModule.startService( 
             (msg) => {
                 log.error("Error while starting the service: " + msg)
         }, 
@@ -33,13 +33,14 @@ class Interfaces extends Component {
         log.debug("Component will un-Mount from Interfaces called")
     }
 
-    sendIntentToServerRecordingDone = () => {
+    sendIntentToServerRecordingDone = (e) => {
         const {sendRecordingDoneIntention} = this.props
-        sendRecordingDoneIntention()
+        sendRecordingDoneIntention(e.RD_TimeStamp)
         Vibration.vibrate(500)
+        DymandFGServiceModule.showNotificationES("Please start the report")
         // After 2 min, vibrate again with a notification
         DymandFGServiceModule.timedWakeLockAndRemindUserSelfReportNotification("2")
-        console.log('Sending recording done User-Intent to Server')
+        log.debug('Sending recording done User-Intent to Server')
     };
 
     sendIntentToServerRemindUserSelfReport = () => {
@@ -67,7 +68,7 @@ class Interfaces extends Component {
 }
 
 const mapStateToDispatch = dispatch => ({
-    sendRecordingDoneIntention: () => dispatch(MessageActions.sendIntention(null, 'RecordingDone', null)),
+    sendRecordingDoneIntention: (timeStamp) => dispatch(MessageActions.sendIntention(null, 'RecordingDone', timeStamp)),
     sendRemindUserSelfReportIntention: () => dispatch(MessageActions.sendIntention(null, 'RemindUserSelfReport', null)),
     sendConfigSentIntention: () => dispatch(MessageActions.sendIntention(null, 'ConfigSent', null)),
     sendSelfReportDoneACKIntention: () => dispatch(MessageActions.sendIntention(null, 'SelfReportDoneACK', null)),

@@ -1,5 +1,6 @@
 package org.c4dhi.mobilecoach.client;
 
+import android.app.PendingIntent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 
@@ -14,5 +15,8 @@ public class Config {
     public static boolean hasStartedSelfReport = false;
     public static boolean DymandFGServiceRunning = false;
     public static boolean onBoardingDone = false;
-    public static int periodicLogsInMin = 15;
+    public static int periodicLogsInMin = 30;
+    public static int pendingIntentFlag = PendingIntent.FLAG_CANCEL_CURRENT;
+
+    public static int webViewCloseTimerCount = 0;
 }

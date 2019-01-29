@@ -1,11 +1,11 @@
 {
   "Onboarding": {
-    "title": "MobileCoach Client",
-    "subtitle": "Willkommen in der Studie.",
+    "title": "DyMand Studie",
+    "subtitle": "Herzlich Willkommen zu unserer Studie \"Partnerschaft und Diabetes\". \n Bitte drücken Sie Weiter, um fortzufahren.",
     "next": "Weiter",
     "chooseLanguage": "Bitte wähle deine bevorzugte Sprache",
-    "chooseCoach": "Suche dir einen Guide aus",
-    "welcome": "Herzlich willkommen bei ...",
+    "chooseCoach": "Suche dir einen digitalen Studienassistent aus",
+    "welcome": "Ich bin Ihr digitaler Coach. Ich werde während der Studienteilnahme mit Ihnen in Kontakt bleiben und Sie die kommende Woche durch die Studie führen. Ich danke Ihnen herzlich für Ihre Teilnahme.",
     "start": "Los geht's",
     "checkQrUsageSubtitle": "Hast du einen OR-Code, wie oben abgebildet erhalten, um diese App zu nutzen?",
     "qrAvailable": "Ja, ich habe einen QR-Code",

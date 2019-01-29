@@ -36,13 +36,11 @@ import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import org.c4dhi.mobilecoach.client.Config;
-import org.c4dhi.mobilecoach.client.LocalTimer;
 import org.c4dhi.mobilecoach.client.MainActivity;
 import org.c4dhi.mobilecoach.client.R;
 
-import java.io.FileNotFoundException;
-
 import static org.c4dhi.mobilecoach.client.Config.DymandFGServiceRunning;
+import static org.c4dhi.mobilecoach.client.Config.pendingIntentFlag;
 
 
 public class DymandFGService extends Service implements DataClient.OnDataChangedListener, MessageClient.OnMessageReceivedListener,
@@ -55,9 +53,11 @@ public class DymandFGService extends Service implements DataClient.OnDataChanged
 
     // user intent signal recording done
     private static final String RECORDING_DONE_PATH = "/recording_done";
+    private static final String RECORDING_DONE_KEY = "ch.ethz.dymand.recording_done";
 
     // self report has-completed ACK signal
     private static final String SELF_REPORT_COMPLETED_ACK_PATH = "/hasCompletedSelfReportACK";
+    private static final String SELF_REPORT_COMPLETED_ACK_KEY = "ch.ethz.dymand.hasCompletedSelfReportACK";
 
     //------Receiving signals-END----------
 
@@ -72,7 +72,7 @@ public class DymandFGService extends Service implements DataClient.OnDataChanged
     // self report has-completed signal
     private static final String SELF_REPORT_COMPLETED_PATH = "/hasCompletedSelfReport";
     private static final String SELF_REPORT_COMPLETED_KEY = "ch.ethz.dymand.hasCompletedSelfReport";
-    private static final String SELF_REPORT_COMPLETED_MESSAGE = "SelfReportSelfReport";
+    private static final String SELF_REPORT_COMPLETED_MESSAGE = "SelfReportCompleted";
 
     // Get config signal (message is the configuration)
     private static final String GET_CONFIG_PATH = "/getconfig";
@@ -115,6 +115,7 @@ public class DymandFGService extends Service implements DataClient.OnDataChanged
             @Override
             public void run() {
                 Log.i(LOG_TAG, "The service is lit!!");
+                //sendToModuleUserIntentRecordingDone();
                 periodicLogs();
             }
         }, Config.periodicLogsInMin * 60 * 1000);
@@ -158,7 +159,7 @@ public class DymandFGService extends Service implements DataClient.OnDataChanged
         Notification notification = null;
         Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
         PendingIntent pendingIntent =
-                PendingIntent.getActivity(this, 0, notificationIntent, 0);
+                PendingIntent.getActivity(this, 0, notificationIntent, pendingIntentFlag);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel serviceChannel = new NotificationChannel(CHANNEL_ID,
@@ -245,7 +246,7 @@ public class DymandFGService extends Service implements DataClient.OnDataChanged
     private void sendSelfReportCompletedSignal() {
         Log.i(LOG_TAG, "Sending selfReportCompletedSignal.");
         PutDataMapRequest putDataMapReq = PutDataMapRequest.create(SELF_REPORT_COMPLETED_PATH);
-        final String toSend = SELF_REPORT_COMPLETED_MESSAGE + (System.currentTimeMillis()%100000);
+        final String toSend = SELF_REPORT_COMPLETED_MESSAGE + "_" +System.currentTimeMillis();
         putDataMapReq.getDataMap().putString(SELF_REPORT_COMPLETED_KEY, toSend);
         PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
         putDataReq.setUrgent();
@@ -260,7 +261,7 @@ public class DymandFGService extends Service implements DataClient.OnDataChanged
     private void sendHasStartedSelfReportSignal() {
         Log.i(LOG_TAG, "Sending HasStartedSelfReportSignal.");
         PutDataMapRequest putDataMapReq = PutDataMapRequest.create(SELF_REPORT_STARTED_PATH);
-        final String toSend = SELF_REPORT_STARTED_MESSAGE + (System.currentTimeMillis()%100000);
+        final String toSend = SELF_REPORT_STARTED_MESSAGE + "_" + System.currentTimeMillis();
         putDataMapReq.getDataMap().putString(SELF_REPORT_STARTED_KEY, toSend);
         PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
         putDataReq.setUrgent();
@@ -275,7 +276,7 @@ public class DymandFGService extends Service implements DataClient.OnDataChanged
     private void sendConfig(String configuration) {
         Log.i(LOG_TAG, "Sending configuration.");;
         PutDataMapRequest putDataMapReq = PutDataMapRequest.create(GET_CONFIG_PATH);
-        final String toSend = configuration+ " " + (System.currentTimeMillis()%100000);
+        final String toSend = configuration;
         putDataMapReq.getDataMap().putString(GET_CONFIG_KEY, toSend);
         PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
         putDataReq.setUrgent();
@@ -288,6 +289,12 @@ public class DymandFGService extends Service implements DataClient.OnDataChanged
     }
 
     private void sendToModuleUserIntentRecordingDone() {
+
+        /*Log.i(LOG_TAG, "Main Activity is opened..");
+        Intent intent = new Intent();
+        intent.setClass(this, MainActivity.class);
+        startActivity(intent);*/
+
         Log.i(LOG_TAG, "Broadcasting user intent recording done.");
         try {
             Intent intent = new Intent(INTENT_STRING_SERVICE_2_MODULE);
@@ -327,14 +334,16 @@ public class DymandFGService extends Service implements DataClient.OnDataChanged
                 if (item.getUri().getPath().compareTo(RECORDING_DONE_PATH) == 0) {
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
                     Log.i(LOG_TAG, "User intent to be sent - recording done and URI is: " + item.getUri());
+                    String message = dataMap.getString(RECORDING_DONE_KEY);
                     Wearable.getDataClient(this).deleteDataItems(item.getUri());
-                    sendToModuleUserIntentRecordingDone();
+                    if(messageOnTime(message)) sendToModuleUserIntentRecordingDone();
                 }
                 if (item.getUri().getPath().compareTo(SELF_REPORT_COMPLETED_ACK_PATH) == 0) {
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
                     Log.i(LOG_TAG, "User intent to be sent - Self Report ack received and URI is: " + item.getUri());
+                    String message = dataMap.getString(SELF_REPORT_COMPLETED_ACK_KEY);
                     Wearable.getDataClient(this).deleteDataItems(item.getUri());
-                    sendToModuleUserIntentSelfReportDoneACK();
+                    if(messageOnTime(message)) sendToModuleUserIntentSelfReportDoneACK();
                 }
 
             } else if (event.getType() == DataEvent.TYPE_DELETED) {
@@ -342,6 +351,12 @@ public class DymandFGService extends Service implements DataClient.OnDataChanged
             }
         }
 
+    }
+
+    private boolean messageOnTime(String message) {
+        long timeStamp = Long.parseLong(message.substring(message.indexOf('_')+1));
+        Log.d(LOG_TAG, "Received time stamp to check is " + timeStamp);
+        return (System.currentTimeMillis() - timeStamp) <= 10000;
     }
 
     @Override

@@ -160,6 +160,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".ReceiveMessageFromHelperReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="ch.ethz.dymand.RECEIVE_MESSAGE_FROM_HELPER" />
+            </intent-filter>
+        </receiver>
+
         <activity android:name=".AffectiveSlider.AffectiveSliderActivity" />
         <activity android:name=".SelfReportDymand.SelfReportDymandActivity" />
     </application>

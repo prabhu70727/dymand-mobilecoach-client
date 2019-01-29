@@ -133,12 +133,12 @@ public class SelfReportDymandActivity extends AppCompatActivity
         String affectiveQuestionText;
 
         if(eod){
-            affectiveQuestionText = "Bitte teilen Sie uns mit den beiden Schiebern mit, wie Sie sich" +
-                    " heute gefühlt haben. Denken Sie nicht zu lange nach, folgen Sie einfach Ihrem Bauchgefühl" ;
+            affectiveQuestionText = "Bitte teilen Sie uns mit den beiden Schiebern mit, wie Sie sich heute " +
+                    "gefühlt haben. Denken Sie nicht zu lange nach, folgen Sie einfach Ihrem Bauchgefühl" ;
         }
         else {
             affectiveQuestionText = "Bitte teilen Sie uns mit den beiden Schiebern mit, wie Sie sich " +
-                    "in den letzten 5 Minuten gefühlt haben. Denken Sie nicht zu lange nach, folgen Sie einfach Ihrem Bauchgefühl";
+                    "in den letzten 5 Minuten gefühlt haben. Denken Sie nicht zu lange nach, folgen Sie einfach Ihrem Bauchgefühl.";
         }
 
         affectiveQuestion.setText(affectiveQuestionText);

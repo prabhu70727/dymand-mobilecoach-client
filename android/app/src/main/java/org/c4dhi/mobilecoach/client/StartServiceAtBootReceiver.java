@@ -21,12 +21,17 @@ public class StartServiceAtBootReceiver extends BroadcastReceiver {
 
   @Override
   public void onReceive(Context context, Intent intent) {
-    SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-    Config.onBoardingDone = sharedPref.getBoolean("isOnboardingDone", false);
+    //SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+    //Config.onBoardingDone = sharedPref.getBoolean("isOnboardingDone", false);
 
-    if(Config.onBoardingDone) {
-      restartService(context);
-    }
+    Log.i(LOG_TAG, "Main Activity is opened..");
+    Intent mainActivityIntent = new Intent();
+    mainActivityIntent.setClass(context, MainActivity.class);
+    context.startActivity(mainActivityIntent);
+
+    //if(Config.onBoardingDone) {
+    //  restartService(context);
+    //}
   }
 
   private void restartService(Context context) {
