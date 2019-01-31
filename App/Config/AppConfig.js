@@ -84,12 +84,12 @@ export default {
       localDeepstreamURL: 'ws://127.0.0.1:6020/deepstream',
       localRestURL: 'http://127.0.0.1:8080/MC/api/v02/',
       localMediaURL: 'http://127.0.0.1/MC/files/',
-      //remoteDeepstreamURL: 'wss://dymand-cdhi.ethz.ch:6021/deepstream',
-      //remoteRestURL: 'https://dymand-cdhi.ethz.ch:8444/MC/api/v02/',
-      //remoteMediaURL: 'https://dymand-cdhi.ethz.ch:8444/MC/files/'
-      remoteDeepstreamURL: 'wss://dymand-cdhi.ethz.ch/ds/deepstream',
-      remoteRestURL: 'https://dymand-cdhi.ethz.ch/MC/api/v02/',
-      remoteMediaURL: 'https://dymand-cdhi.ethz.ch/MC/files/'
+      remoteDeepstreamURL: 'wss://dymand-cdhi.ethz.ch:6021/deepstream',
+      remoteRestURL: 'https://dymand-cdhi.ethz.ch:8444/MC/api/v02/',
+      remoteMediaURL: 'https://dymand-cdhi.ethz.ch:8444/MC/files/'
+      //remoteDeepstreamURL: 'wss://dymand-cdhi.ethz.ch/ds/deepstream',
+      //remoteRestURL: 'https://dymand-cdhi.ethz.ch/MC/api/v02/',
+      //remoteMediaURL: 'https://dymand-cdhi.ethz.ch/MC/files/'
     },
     dymand: {
       shareUrl: {
