@@ -20,7 +20,7 @@ class ScreenStartWithLogo extends Component {
     const { navigate } = this.props.navigation
     return (
       <View style={styles.container}>
-        <CameraGetPermission />
+        {/*<CameraGetPermission />*/}
         <View style={styles.imageContainer}>
           <View style={styles.logoContainer}>
             <Image style={styles.logoImage} source={Images.appLogo} />

@@ -695,8 +695,8 @@ class Chat extends Component {
         <RepeatingBackgroundImage source={Images.chatBg}>
           {this.renderLoadingIndicator()}
           {this.renderNavigationbar(this.props)}
-          <Interfaces />
-          <CameraGetPermission />
+          {/*<Interfaces />
+          <CameraGetPermission />*/}
           <GiftedChat {...this.getChatProperties()}>
             <ImageCacheProvider />
           </GiftedChat>

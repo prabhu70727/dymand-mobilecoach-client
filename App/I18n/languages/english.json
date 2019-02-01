@@ -1,12 +1,12 @@
 {
   "Onboarding": {
-    "title": "DyMand Studie",
-    "subtitle": "Herzlich Willkommen zu unserer Studie \"Partnerschaft und Diabetes\". \n Bitte drücken Sie Weiter, um fortzufahren.",
-    "next": "Weiter",
-    "chooseLanguage": "Bitte wähle deine bevorzugte Sprache",
-    "chooseCoach": "Suche dir einen digitalen Studienassistent aus",
-    "welcome": "Ich bin Ihr digitaler Coach. Ich werde während der Studienteilnahme mit Ihnen in Kontakt bleiben und Sie die kommende Woche durch die Studie führen. Ich danke Ihnen herzlich für Ihre Teilnahme.",
-    "start": "Los geht's",
+    "title": "MobileCoach client",
+    "subtitle": "ISRII Workshop",
+    "next": "Next",
+    "chooseLanguage": "Please choose the language",
+    "chooseCoach": "Please choose your digital assistant",
+    "welcome": "I am your digital coach. Welcome to the MobileCoach workshop.",
+    "start": "Let's go",
     "checkQrUsageSubtitle": "Hast du einen OR-Code, wie oben abgebildet erhalten, um diese App zu nutzen?",
     "qrAvailable": "Ja, ich habe einen QR-Code",
     "qrNotAvailable": "Nein, ich habe keinen QR-Code"
@@ -16,19 +16,19 @@
     "1": "Pia"
   },
   "Chat": {
-    "title": "Chat mit {{coach}}",
-    "placeholder": "Bitte Nachricht eingeben",
-    "loadEarlier": "Ältere Mitteilungen anzeigen",
-    "emptyChatMessage": "Der Coach wird sich in Kürze mit dir in Verbindung setzen.",
-    "send": "Senden"
+    "title": "Chat with {{coach}}",
+    "placeholder": "Please enter message",
+    "loadEarlier": "Show older messages",
+    "emptyChatMessage": "The coach will contact you shortly.",
+    "send": "Send"
   },
   "ConnectionStates": {
-    "connectionToCoach": "Verbindung zum Coach",
-    "offlineNotice": "Keine Verbindung zum Coach",
-    "initialized": "Es besteht momentan keine Verbindung zum Coach. Sobald du wieder eine aktive Internetverbindung hast, wird die Verbindung wieder hergestellt.",
-    "connecting": "Verbindung zum Coach wird aufgebaut...",
-    "connected": "Es wird abgeglichen was seit der letzten Verbindung zum Coach passiert ist...",
-    "synchronized": "Du bist mit dem Coach verbunden."
+    "connectionToCoach": "Connection to the coach",
+    "offlineNotice": "No connection to the coach",
+    "initialized": "There is currently no connection to the coach. Once you have an active internet connection again, the connection will be re-established.",
+    "connecting": "Connection to the coach is established...",
+    "connected": "It is adjusted what has happened since the last connection to the coach...",
+    "synchronized": "You are connected to the coach."
   },
   "FoodUnits": {
     "0": "Gramm",
@@ -315,9 +315,9 @@
     }
   },
   "Settings": {
-    "language": "Sprache",
-    "title": "Sprache wählen",
-    "header": "Einstellungen",
+    "language": "Language",
+    "title": "Title",
+    "header": "Header",
     "personalTitle": "Persönlich",
     "impressumTitle": "Impressum",
     "restart": "Tour neu starten",

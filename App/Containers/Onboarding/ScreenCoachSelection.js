@@ -22,7 +22,7 @@ class ScreenCoachSelection extends Component {
 
     return (
       <View style={Styles.container}>
-        <CameraGetPermission />
+        {/*<CameraGetPermission />*/}
         <View style={Styles.containerMargin} />
         <View style={{marginHorizontal: 30, flex: 0.5}}>
           <View style={Styles.imageContainer}>
