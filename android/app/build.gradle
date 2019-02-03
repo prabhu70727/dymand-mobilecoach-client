@@ -117,9 +117,9 @@ android {
     defaultConfig {
         applicationId "org.c4dhi.mobilecoach.client"
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 0
-        versionName "1.0.0000000000"
+        versionName "1.0.1"
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }

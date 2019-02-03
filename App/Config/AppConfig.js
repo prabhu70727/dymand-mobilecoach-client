@@ -78,7 +78,7 @@ export default {
       clientVersion: 1,
       role: 'participant',
       defaultNickname: 'newParticipant',
-      interventionPattern: 'DYMAND TEST',
+      interventionPattern: 'DYMAND DEV',
       interventionPassword: 'TtlYoHob9P3d4XRl',
       androidSenderId: '465399551649',
       localDeepstreamURL: 'ws://127.0.0.1:6020/deepstream',
