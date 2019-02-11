@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MobileCoach Client</string>
+    <string name="app_name">DYMAND</string>
     <string name="notification_title">DYMAND App</string>
     <string name="notification_message_initial">Initial Service Running</string>
     <string name="notification_message_intervention">Intervention Service Running</string>
